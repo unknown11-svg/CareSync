@@ -1,14 +1,13 @@
-
-// Analytics endpoint
-router.get('/analytics', referralController.getReferralAnalytics);
 const express = require('express');
 const router = express.Router();
 const referralController = require('../controllers/referralController');
 const authMiddleware = require('../middleware/authMiddleware');
 
+// Analytics endpoint
+router.get('/analytics', referralController.getReferralAnalytics);
+
 // All routes require provider authentication
 router.use(authMiddleware.requireProvider);
-
 
 router.post('/', referralController.createReferral);
 router.get('/', referralController.getReferrals);
