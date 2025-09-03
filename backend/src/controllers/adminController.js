@@ -48,6 +48,18 @@ const adminLogin = async (req, res) => {
   }
 };
 
+// Delete facility
+const deleteFacility = async (req, res) => {
+  try {
+    const facility = await Facility.findByIdAndDelete(req.params.id);
+    if (!facility) {
+      return res.status(404).json({ message: 'Facility not found' });
+    }
+    res.json({ message: 'Facility deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting facility', error: error.message });
+  }
+};
 // Create new facility
 const createFacility = async (req, res) => {
   try {
@@ -105,6 +117,7 @@ const getFacilities = async (req, res) => {
     const facilities = await Facility.find();
     res.json(facilities);
   } catch (error) {
+
     res.status(500).json({ message: 'Error fetching facilities', error: error.message });
   }
 };

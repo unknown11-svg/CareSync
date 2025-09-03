@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import RSVPConfirmation from './pages/RSVPConfirmation';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './pages/Login';
@@ -9,12 +10,20 @@ import Dashboard from './pages/Dashboard';
 import Facilities from './pages/Facilities';
 import Providers from './pages/Providers';
 import Layout from './components/Layout';
+import HospitalDashboard from './pages/HospitalDashboard';
 import ProviderLayout from './components/ProviderLayout';
 import ProviderDashboard from './pages/ProviderDashboard';
 import ProviderSlots from './pages/provider/Slots';
 import ProviderReferrals from './pages/provider/Referrals';
 import ProviderEvents from './pages/provider/Events';
 import ProviderAnalytics from './pages/provider/Analytics';
+import FacilityDashboard from './pages/FacilityDashboard';
+            {/* Facility admin shell */}
+            <Route path="/facility" element={
+              <PrivateRoute roles={["facility-admin"]}>
+                <FacilityDashboard />
+              </PrivateRoute>
+            } />
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, user } = useAuth();
@@ -40,6 +49,7 @@ function App() {
               <Route index element={<Dashboard />} />
               <Route path="facilities" element={<Facilities />} />
               <Route path="providers" element={<Providers />} />
+              <Route path="hospital" element={<HospitalDashboard />} />
             </Route>
 
             {/* Provider shell (placeholder) */}
@@ -65,6 +75,9 @@ function App() {
             }>
               <Route path="dashboard" element={<PatientDashboard />} />
             </Route>
+
+            {/* Public RSVP confirmation page for WhatsApp links */}
+            <Route path="/rsvp/:eventId/:patientId" element={<RSVPConfirmation />} />
 
             {/* Default redirect */}
             <Route path="/" element={<Navigate to="/admin" />} />

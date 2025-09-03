@@ -1,3 +1,39 @@
+// Get referral analytics (counts by status, monthly trends)
+const getReferralAnalytics = async (req, res) => {
+  try {
+    // Count by status
+    const statusAgg = await Referral.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]);
+    const statusCounts = statusAgg.reduce((acc, cur) => {
+      acc[cur._id] = cur.count;
+      return acc;
+    }, {});
+
+    // Monthly trend (last 6 months)
+    const now = new Date();
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+    const monthlyAgg = await Referral.aggregate([
+      { $match: { createdAt: { $gte: sixMonthsAgo } } },
+      { $group: {
+        _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' }, status: '$status' },
+        count: { $sum: 1 }
+      } },
+      { $sort: { '_id.year': 1, '_id.month': 1 } }
+    ]);
+    // Format monthly data
+    const monthly = {};
+    monthlyAgg.forEach(item => {
+      const key = `${item._id.year}-${item._id.month.toString().padStart(2, '0')}`;
+      if (!monthly[key]) monthly[key] = {};
+      monthly[key][item._id.status] = item.count;
+    });
+
+    res.json({ statusCounts, monthly });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching referral analytics', error: error.message });
+  }
+};
 const Referral = require('../models/referral');
 const Slot = require('../models/slot');
 
@@ -73,5 +109,6 @@ const cancelReferral = async (req, res) => {
 module.exports = {
   createReferral,
   getReferrals,
-  cancelReferral
+  cancelReferral,
+  getReferralAnalytics
 };

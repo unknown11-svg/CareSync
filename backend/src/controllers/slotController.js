@@ -1,4 +1,6 @@
+
 const Slot = require('../models/slot');
+const Patient = require('../models/patients');
 
 // Get available slots for a department, with optional date filtering
 const getSlots = async (req, res) => {
@@ -35,10 +37,11 @@ const createSlot = async (req, res) => {
   }
 };
 
-// Book a slot (mark as booked)
+
+// Book a slot (mark as booked) and notify patient
 const bookSlot = async (req, res) => {
   try {
-    const { slot_id } = req.body;
+    const { slot_id, patient_id } = req.body;
 
     const slot = await Slot.findById(slot_id);
     if (!slot || slot.status !== 'open') {
@@ -47,6 +50,18 @@ const bookSlot = async (req, res) => {
 
     slot.status = 'booked';
     await slot.save();
+
+    // Notify patient if patient_id provided
+    if (patient_id) {
+      const patient = await Patient.findById(patient_id);
+      if (patient) {
+        patient.notifications.push({
+          message: `Your appointment is confirmed for ${slot.start_at ? new Date(slot.start_at).toLocaleString() : 'the scheduled time'}.`,
+          sentAt: new Date()
+        });
+        await patient.save();
+      }
+    }
 
     res.json({ message: 'Slot booked successfully', slot });
   } catch (error) {
