@@ -15,6 +15,10 @@ function Facilities() {
     },
     departments: []
   });
+  const [editingId, setEditingId] = useState(null);
+  // string inputs to allow negative sign and partial decimals
+  const [latInput, setLatInput] = useState('0');
+  const [lngInput, setLngInput] = useState('0');
 
   useEffect(() => {
     fetchFacilities();
@@ -34,9 +38,27 @@ function Facilities() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/admin/facilities', formData);
-      toast.success('Facility created successfully');
+      const latitude = parseFloat(latInput);
+      const longitude = parseFloat(lngInput);
+      const payload = {
+        ...formData,
+        location: {
+          ...formData.location,
+          coordinates: [
+            isNaN(longitude) ? 0 : longitude,
+            isNaN(latitude) ? 0 : latitude
+          ]
+        }
+      };
+      if (editingId) {
+        await api.put(`/admin/facilities/${editingId}`, payload);
+        toast.success('Facility updated successfully');
+      } else {
+        await api.post('/admin/facilities', payload);
+        toast.success('Facility created successfully');
+      }
       setShowForm(false);
+      setEditingId(null);
       setFormData({
         name: '',
         type: 'hospital',
@@ -45,9 +67,11 @@ function Facilities() {
         },
         departments: []
       });
+      setLatInput('0');
+      setLngInput('0');
       fetchFacilities();
     } catch (error) {
-      toast.error('Failed to create facility');
+      toast.error('Failed to save facility');
     }
   };
 
@@ -59,23 +83,50 @@ function Facilities() {
     }));
   };
 
+  const startEdit = (facility) => {
+    setEditingId(facility._id);
+    setFormData({
+      name: facility.name,
+      type: facility.type,
+      location: {
+        coordinates: [
+          facility.location?.coordinates?.[0] || 0,
+          facility.location?.coordinates?.[1] || 0
+        ]
+      },
+      departments: facility.departments || []
+    });
+    setLngInput(String(facility.location?.coordinates?.[0] ?? 0));
+    setLatInput(String(facility.location?.coordinates?.[1] ?? 0));
+    setShowForm(true);
+  };
+
   const handleLocationChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      location: {
-        ...prev.location,
-        coordinates: name === 'latitude' 
-          ? [prev.location.coordinates[0], parseFloat(value)]
-          : [parseFloat(value), prev.location.coordinates[1]]
-      }
-    }));
+    // Allow optional leading '-', digits, optional decimal point and fraction
+    if (!/^[-]?\d*(?:[.]\d*)?$/.test(value)) return;
+    if (name === 'latitude') {
+      setLatInput(value);
+    } else {
+      setLngInput(value);
+    }
+  };
+
+  const toDMS = (decimal, isLat) => {
+    if (decimal === undefined || decimal === null || isNaN(decimal)) return '';
+    const hemisphere = isLat ? (decimal < 0 ? 'S' : 'N') : (decimal < 0 ? 'W' : 'E');
+    const abs = Math.abs(decimal);
+    const degrees = Math.floor(abs);
+    const minutesFloat = (abs - degrees) * 60;
+    const minutes = Math.floor(minutesFloat);
+    const seconds = Math.round((minutesFloat - minutes) * 60);
+    return `${degrees}° ${minutes}' ${seconds}"${hemisphere}`;
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -139,10 +190,9 @@ function Facilities() {
                   Latitude
                 </label>
                 <input
-                  type="number"
-                  step="any"
+                  type="text"
                   name="latitude"
-                  value={formData.location.coordinates[1]}
+                  value={latInput}
                   onChange={handleLocationChange}
                   className="input-field"
                   required
@@ -153,10 +203,9 @@ function Facilities() {
                   Longitude
                 </label>
                 <input
-                  type="number"
-                  step="any"
+                  type="text"
                   name="longitude"
-                  value={formData.location.coordinates[0]}
+                  value={lngInput}
                   onChange={handleLocationChange}
                   className="input-field"
                   required
@@ -221,14 +270,17 @@ function Facilities() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                         {facility.type}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center text-sm text-gray-500">
                         <MapPin className="h-4 w-4 mr-1" />
-                        {facility.location?.coordinates?.[1]?.toFixed(4)}, {facility.location?.coordinates?.[0]?.toFixed(4)}
+                        <span>
+                          Lat: {toDMS(facility.location?.coordinates?.[1], true)}
+                          {', '}Lon: {toDMS(facility.location?.coordinates?.[0], false)}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -236,7 +288,7 @@ function Facilities() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex gap-2">
-                        <button className="text-primary-600 hover:text-primary-900">
+                        <button onClick={() => startEdit(facility)} className="text-primary-500 hover:text-primary-700">
                           <Edit className="h-4 w-4" />
                         </button>
                         <button className="text-red-600 hover:text-red-900">

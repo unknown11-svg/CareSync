@@ -74,10 +74,35 @@ const createFacility = async (req, res) => {
   }
 };
 
+// Update facility
+const updateFacility = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const facility = await Facility.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!facility) {
+      return res.status(404).json({ message: 'Facility not found' });
+    }
+
+    res.json({
+      message: 'Facility updated successfully',
+      facility
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating facility', error: error.message });
+  }
+};
+
 // Get all facilities
 const getFacilities = async (req, res) => {
   try {
-    const facilities = await Facility.find().populate('departments');
+    const facilities = await Facility.find();
     res.json(facilities);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching facilities', error: error.message });
@@ -93,6 +118,7 @@ const createProvider = async (req, res) => {
       name, 
       facilityId, 
       departmentId, 
+      department,
       role, 
       phone, 
       permissions 
@@ -115,7 +141,8 @@ const createProvider = async (req, res) => {
       password,
       name,
       facilityId,
-      departmentId,
+      departmentId: departmentId || undefined,
+      department,
       role,
       phone,
       permissions: permissions || []
@@ -141,7 +168,6 @@ const getProviders = async (req, res) => {
   try {
     const providers = await Provider.find({ isActive: true })
       .populate('facilityId', 'name type')
-      .populate('departmentId', 'name')
       .select('-password');
 
     res.json(providers);
@@ -232,6 +258,7 @@ module.exports = {
   adminLogin,
   createFacility,
   getFacilities,
+  updateFacility,
   createProvider,
   getProviders,
   updateProvider,

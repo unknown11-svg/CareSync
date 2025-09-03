@@ -15,6 +15,7 @@ router.get('/dashboard/stats', adminController.getDashboardStats);
 // Facility management
 router.post('/facilities', adminController.createFacility);
 router.get('/facilities', adminController.getFacilities);
+router.put('/facilities/:id', adminController.updateFacility);
 
 // Provider management
 router.post('/providers', adminController.createProvider);

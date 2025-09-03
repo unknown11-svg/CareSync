@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import api from '../services/api';
 import { 
@@ -11,6 +12,7 @@ import {
 } from 'lucide-react';
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalFacilities: 0,
     totalProviders: 0,
@@ -39,28 +41,28 @@ function Dashboard() {
       name: 'Total Facilities',
       value: stats.totalFacilities,
       icon: Building2,
-      color: 'bg-blue-500',
+      color: 'bg-primary-500',
       description: 'Registered healthcare facilities'
     },
     {
       name: 'Active Providers',
       value: stats.totalProviders,
       icon: Users,
-      color: 'bg-green-500',
+      color: 'bg-accent-500',
       description: 'Healthcare staff accounts'
     },
     {
       name: 'Registered Patients',
       value: stats.totalPatients,
       icon: UserCheck,
-      color: 'bg-purple-500',
+      color: 'bg-primary-600',
       description: 'Patients in the system'
     },
     {
       name: 'Active Referrals',
       value: stats.activeReferrals,
       icon: FileText,
-      color: 'bg-orange-500',
+      color: 'bg-accent-600',
       description: 'Pending and confirmed referrals'
     }
   ];
@@ -68,7 +70,7 @@ function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -103,21 +105,21 @@ function Dashboard() {
         <div className="card">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
           <div className="space-y-3">
-            <button className="w-full flex items-center justify-between p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <button onClick={() => navigate('/facilities')} className="w-full flex items-center justify-between p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               <div className="flex items-center">
                 <Building2 className="h-5 w-5 text-gray-400 mr-3" />
                 <span className="text-sm font-medium text-gray-900">Add New Facility</span>
               </div>
               <span className="text-xs text-gray-500">→</span>
             </button>
-            <button className="w-full flex items-center justify-between p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <button onClick={() => navigate('/providers')} className="w-full flex items-center justify-between p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               <div className="flex items-center">
                 <Users className="h-5 w-5 text-gray-400 mr-3" />
                 <span className="text-sm font-medium text-gray-900">Create Provider Account</span>
               </div>
               <span className="text-xs text-gray-500">→</span>
             </button>
-            <button className="w-full flex items-center justify-between p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <button onClick={() => navigate('/providers')} className="w-full flex items-center justify-between p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               <div className="flex items-center">
                 <Calendar className="h-5 w-5 text-gray-400 mr-3" />
                 <span className="text-sm font-medium text-gray-900">View Recent Activity</span>

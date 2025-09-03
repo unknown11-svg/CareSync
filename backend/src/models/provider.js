@@ -22,9 +22,26 @@ const providerSchema = new mongoose.Schema({
     ref: 'Facility',
     required: true
   },
-  departmentId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Department'
+  department: {
+    type: String,
+    enum: [
+      'neurology',
+      'oncology',
+      'dental',
+      'gynecology',
+      'dermatology',
+      'gastroenterology',
+      'cardiology',
+      'pediatrics',
+      'orthopedics',
+      'radiology',
+      'psychiatry',
+      'urology',
+      'nephrology',
+      'ophthalmology',
+      'ent',
+      'general_medicine'
+    ]
   },
   role: {
     type: String,

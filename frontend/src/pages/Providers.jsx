@@ -9,12 +9,14 @@ function Providers() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     name: '',
     facilityId: '',
     departmentId: '',
+    department: '',
     role: 'doctor',
     phone: '',
     permissions: []
@@ -48,15 +50,29 @@ function Providers() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/admin/providers', formData);
-      toast.success('Provider account created successfully');
+      const payload = { ...formData };
+      if (!payload.departmentId) {
+        delete payload.departmentId;
+      }
+      if (!payload.department) {
+        delete payload.department;
+      }
+      if (editingId) {
+        await api.put(`/admin/providers/${editingId}`, payload);
+        toast.success('Provider updated successfully');
+      } else {
+        await api.post('/admin/providers', payload);
+        toast.success('Provider account created successfully');
+      }
       setShowForm(false);
+      setEditingId(null);
       setFormData({
         email: '',
         password: '',
         name: '',
         facilityId: '',
         departmentId: '',
+        department: '',
         role: 'doctor',
         phone: '',
         permissions: []
@@ -73,6 +89,23 @@ function Providers() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const startEdit = (provider) => {
+    setEditingId(provider._id);
+    setShowForm(true);
+    setShowPassword(false);
+    setFormData({
+      email: provider.email,
+      password: '',
+      name: provider.name,
+      facilityId: provider.facilityId?._id || provider.facilityId,
+      departmentId: provider.departmentId || '',
+      department: provider.department || '',
+      role: provider.role,
+      phone: provider.phone,
+      permissions: provider.permissions || []
+    });
   };
 
   const handlePermissionChange = (permission) => {
@@ -98,10 +131,10 @@ function Providers() {
 
   const getRoleColor = (role) => {
     const colors = {
-      doctor: 'bg-blue-100 text-blue-800',
-      nurse: 'bg-green-100 text-green-800',
-      admin: 'bg-purple-100 text-purple-800',
-      coordinator: 'bg-orange-100 text-orange-800'
+      doctor: 'bg-primary-100 text-primary-800',
+      nurse: 'bg-accent-100 text-accent-800',
+      admin: 'bg-primary-200 text-primary-900',
+      coordinator: 'bg-accent-200 text-accent-900'
     };
     return colors[role] || 'bg-gray-100 text-gray-800';
   };
@@ -109,7 +142,7 @@ function Providers() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -243,6 +276,35 @@ function Providers() {
                   <option value="coordinator">Coordinator</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Department
+                </label>
+                <select
+                  name="department"
+                  value={formData.department}
+                  onChange={handleInputChange}
+                  className="input-field"
+                >
+                  <option value="">Select department</option>
+                  <option value="neurology">Neurology</option>
+                  <option value="oncology">Oncology</option>
+                  <option value="dental">Dental</option>
+                  <option value="gynecology">Gynecology</option>
+                  <option value="dermatology">Dermatology</option>
+                  <option value="gastroenterology">Gastroenterology</option>
+                  <option value="cardiology">Cardiology</option>
+                  <option value="pediatrics">Pediatrics</option>
+                  <option value="orthopedics">Orthopedics</option>
+                  <option value="radiology">Radiology</option>
+                  <option value="psychiatry">Psychiatry</option>
+                  <option value="urology">Urology</option>
+                  <option value="nephrology">Nephrology</option>
+                  <option value="ophthalmology">Ophthalmology</option>
+                  <option value="ent">ENT</option>
+                  <option value="general_medicine">General Medicine</option>
+                </select>
+              </div>
             </div>
 
             <div>
@@ -256,7 +318,7 @@ function Providers() {
                       type="checkbox"
                       checked={formData.permissions.includes(permission)}
                       onChange={() => handlePermissionChange(permission)}
-                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      className="rounded border-gray-300 text-primary-500 focus:ring-primary-500"
                     />
                     <span className="ml-2 text-sm text-gray-700">
                       {permission.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -299,6 +361,9 @@ function Providers() {
                     Role
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Department
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Facility
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -330,6 +395,9 @@ function Providers() {
                         {provider.role}
                       </span>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {provider.department ? provider.department.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'N/A'}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center text-sm text-gray-500">
                         <Building2 className="h-4 w-4 mr-1" />
@@ -344,7 +412,7 @@ function Providers() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex gap-2">
-                        <button className="text-primary-600 hover:text-primary-900">
+                        <button onClick={() => startEdit(provider)} className="text-primary-500 hover:text-primary-700">
                           <Edit className="h-4 w-4" />
                         </button>
                         <button 

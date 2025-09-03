@@ -36,30 +36,60 @@ const verifyToken = async (req, res, next) => {
 // Require admin authentication
 const requireAdmin = async (req, res, next) => {
   try {
-    await verifyToken(req, res, () => {});
+    const token = req.header('Authorization')?.replace('Bearer ', '');
     
-    if (req.userType !== 'admin') {
+    if (!token) {
+      return res.status(401).json({ message: 'Access denied. No token provided.' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    
+    if (decoded.type !== 'admin') {
       return res.status(403).json({ message: 'Admin access required.' });
     }
     
+    // Check if admin exists and is active
+    const user = await Admin.findById(decoded.id).select('-password');
+    
+    if (!user || !user.isActive) {
+      return res.status(401).json({ message: 'Invalid token or user inactive.' });
+    }
+
+    req.user = user;
+    req.userType = decoded.type;
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Authentication failed.' });
+    res.status(401).json({ message: 'Invalid token.' });
   }
 };
 
 // Require provider authentication
 const requireProvider = async (req, res, next) => {
   try {
-    await verifyToken(req, res, () => {});
+    const token = req.header('Authorization')?.replace('Bearer ', '');
     
-    if (req.userType !== 'provider') {
+    if (!token) {
+      return res.status(401).json({ message: 'Access denied. No token provided.' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    
+    if (decoded.type !== 'provider') {
       return res.status(403).json({ message: 'Provider access required.' });
     }
     
+    // Check if provider exists and is active
+    const user = await Provider.findById(decoded.id).select('-password');
+    
+    if (!user || !user.isActive) {
+      return res.status(401).json({ message: 'Invalid token or user inactive.' });
+    }
+
+    req.user = user;
+    req.userType = decoded.type;
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Authentication failed.' });
+    res.status(401).json({ message: 'Invalid token.' });
   }
 };
 
