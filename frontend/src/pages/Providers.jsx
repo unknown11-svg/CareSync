@@ -285,24 +285,37 @@ function Providers() {
                   value={formData.department}
                   onChange={handleInputChange}
                   className="input-field"
+                  disabled={!formData.facilityId}
                 >
-                  <option value="">Select department</option>
-                  <option value="neurology">Neurology</option>
-                  <option value="oncology">Oncology</option>
-                  <option value="dental">Dental</option>
-                  <option value="gynecology">Gynecology</option>
-                  <option value="dermatology">Dermatology</option>
-                  <option value="gastroenterology">Gastroenterology</option>
-                  <option value="cardiology">Cardiology</option>
-                  <option value="pediatrics">Pediatrics</option>
-                  <option value="orthopedics">Orthopedics</option>
-                  <option value="radiology">Radiology</option>
-                  <option value="psychiatry">Psychiatry</option>
-                  <option value="urology">Urology</option>
-                  <option value="nephrology">Nephrology</option>
-                  <option value="ophthalmology">Ophthalmology</option>
-                  <option value="ent">ENT</option>
-                  <option value="general_medicine">General Medicine</option>
+                  <option value="">{formData.facilityId ? 'Select department' : 'Select a facility first'}</option>
+                  {facilities
+                    .find(f => f._id === formData.facilityId)?.departments
+                    ?.filter(dep => dep && dep.name)
+                    .map(dep => {
+                      // Map display name to enum value
+                      const nameMap = {
+                        'Neurology': 'neurology',
+                        'Oncology': 'oncology',
+                        'Dental': 'dental',
+                        'Gynecology': 'gynecology',
+                        'Dermatology': 'dermatology',
+                        'Gastroenterology': 'gastroenterology',
+                        'Cardiology': 'cardiology',
+                        'Pediatrics': 'pediatrics',
+                        'Orthopedics': 'orthopedics',
+                        'Radiology': 'radiology',
+                        'Psychiatry': 'psychiatry',
+                        'Urology': 'urology',
+                        'Nephrology': 'nephrology',
+                        'Ophthalmology': 'ophthalmology',
+                        'ENT': 'ent',
+                        'General Medicine': 'general_medicine',
+                      };
+                      const value = nameMap[dep.name] || dep.name;
+                      return (
+                        <option key={dep.id || value} value={value}>{dep.name}</option>
+                      );
+                    })}
                 </select>
               </div>
             </div>

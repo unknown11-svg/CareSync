@@ -113,30 +113,32 @@ const jwt = require('jsonwebtoken');
 // Patient login
 const patientLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const patient = await Patient.findOne({ email });
+    const { phone } = req.body;
+    const patient = await Patient.findOne({ phone });
     if (!patient) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-    const isPasswordValid = await patient.comparePassword(password);
-    if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     const token = jwt.sign(
       {
         id: patient._id,
-        email: patient.email,
+        phone: patient.phone,
         role: 'patient',
         type: 'patient'
       },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '24h' }
     );
-    const patientResponse = patient.toObject();
-    delete patientResponse.password;
-    res.json({ token, patient: patientResponse });
+    res.json({
+      token,
+      patient: {
+        id: patient._id,
+        phone: patient.phone,
+        preferredLanguage: patient.preferredLanguage,
+        consented: patient.consented
+      }
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: 'Login failed', error: error.message });
   }
 };
 

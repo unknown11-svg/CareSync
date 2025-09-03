@@ -3,6 +3,7 @@ import api from '../services/api';
 import { toast } from 'react-hot-toast';
 import MapPicker from '../components/MapPicker';
 
+export default function FacilitiesAdminTab() {
   const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -74,7 +75,16 @@ import MapPicker from '../components/MapPicker';
       setFormError(err);
       return;
     }
-    // Prepare location for backend
+    // Prepare location and departments for backend
+    // Generate a random ObjectId for each department if missing
+    function generateObjectId() {
+      // 24 hex chars
+      return Array(24)
+        .fill(0)
+        .map(() => Math.floor(Math.random() * 16).toString(16))
+        .join('');
+    }
+
     const payload = {
       ...formData,
       location: {
@@ -83,7 +93,11 @@ import MapPicker from '../components/MapPicker';
           Number(formData.longitude),
           Number(formData.latitude)
         ]
-      }
+      },
+      departments: (formData.departments || []).map(dep => ({
+        ...dep,
+        id: dep.id || generateObjectId(),
+      }))
     };
     try {
       if (editingId) {
@@ -138,7 +152,7 @@ import MapPicker from '../components/MapPicker';
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-          <div className="bg-white rounded shadow-lg p-6 w-full max-w-md relative">
+          <div className="bg-white rounded shadow-lg p-6 w-full max-w-md relative max-h-[90vh] overflow-y-auto">
             <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700" onClick={() => setShowForm(false)}>&times;</button>
             <h3 className="text-lg font-bold mb-4">{editingId ? 'Edit Facility' : 'Add Facility'}</h3>
             <form onSubmit={handleFormSubmit} className="space-y-4">
@@ -225,4 +239,4 @@ import MapPicker from '../components/MapPicker';
       )}
     </div>
   );
-
+}

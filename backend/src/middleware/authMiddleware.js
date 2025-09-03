@@ -1,6 +1,31 @@
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/admin');
 const Provider = require('../models/provider');
+const FacilityAdmin = require('../models/facilityAdmin');
+const Patient = require('../models/patients');
+// Require facility-admin authentication
+const requireFacilityAdmin = async (req, res, next) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ message: 'Access denied. No token provided.' });
+    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    if (decoded.type !== 'facility-admin') {
+      return res.status(403).json({ message: 'Facility admin access required.' });
+    }
+    // Check if facility admin exists and is active (if you have isActive field)
+    const user = await FacilityAdmin.findById(decoded.id).select('-password');
+    if (!user /*|| !user.isActive*/) {
+      return res.status(401).json({ message: 'Invalid token or user inactive.' });
+    }
+    req.user = user;
+    req.userType = decoded.type;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid token.' });
+  }
+};
 
 // Verify JWT token
 const verifyToken = async (req, res, next) => {
@@ -19,9 +44,12 @@ const verifyToken = async (req, res, next) => {
       user = await Admin.findById(decoded.id).select('-password');
     } else if (decoded.type === 'provider') {
       user = await Provider.findById(decoded.id).select('-password');
+    } else if (decoded.type === 'patient') {
+      user = await Patient.findById(decoded.id);
     }
 
-    if (!user || !user.isActive) {
+    // Only check isActive for admin/provider; patients may not have this field
+    if (!user || ((decoded.type === 'admin' || decoded.type === 'provider') && !user.isActive)) {
       return res.status(401).json({ message: 'Invalid token or user inactive.' });
     }
 
@@ -126,6 +154,7 @@ module.exports = {
   verifyToken,
   requireAdmin,
   requireProvider,
+  requireFacilityAdmin,
   optionalAuth,
   requirePermission: (permission) => async (req, res, next) => {
     try {

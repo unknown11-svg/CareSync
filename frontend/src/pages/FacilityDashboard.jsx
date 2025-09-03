@@ -1,11 +1,11 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { FaSpinner } from 'react-icons/fa';
 import FacilityProviders from './FacilityProviders';
 import FacilityDepartments from './FacilityDepartments';
 import FacilitySlots from './FacilitySlots';
 import FacilityEvents from './FacilityEvents';
 import FacilityPatients from './FacilityPatients';
-import { useEffect, useState as useState2 } from 'react';
 
 const TABS = [
   { key: 'providers', label: 'Providers' },
@@ -16,9 +16,30 @@ const TABS = [
   { key: 'analytics', label: 'Analytics' },
 ];
 
+
 export default function FacilityDashboard() {
   const [activeTab, setActiveTab] = useState('providers');
   const [loading, setLoading] = useState(false);
+  const [facility, setFacility] = useState(null);
+
+  // Fetch the current facility (simulate or replace with real fetch as needed)
+  useEffect(() => {
+    async function fetchFacility() {
+      try {
+        const res = await fetch('/api/facility-admin/my-facility', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+        });
+        if (!res.ok) throw new Error('Failed to fetch facility');
+        const data = await res.json();
+        setFacility(data || null);
+      } catch {
+        setFacility(null);
+      }
+    }
+    fetchFacility();
+  }, []);
 
   // Simulate loading for dashboard switch (optional, can be removed if not needed)
   const handleTabChange = (tab) => {
@@ -50,14 +71,18 @@ export default function FacilityDashboard() {
           <div className="text-gray-500">Loading...</div>
         </div>
       ) : (
-        <>
-          {activeTab === 'providers' && <FacilityProviders />}
-          {activeTab === 'departments' && <FacilityDepartments />}
-          {activeTab === 'slots' && <FacilitySlots />}
-          {activeTab === 'events' && <FacilityEvents />}
-          {activeTab === 'patients' && <FacilityPatients />}
-          {activeTab === 'analytics' && <FacilityAnalytics />}
-        </>
+        facility ? (
+          <>
+            {activeTab === 'providers' && <FacilityProviders departments={facility.departments || []} />}
+            {activeTab === 'departments' && <FacilityDepartments />}
+            {activeTab === 'slots' && <FacilitySlots />}
+            {activeTab === 'events' && <FacilityEvents />}
+            {activeTab === 'patients' && <FacilityPatients />}
+            {activeTab === 'analytics' && <FacilityAnalytics />}
+          </>
+        ) : (
+          <div className="text-gray-500 text-center py-8">No facility found or assigned to your account.</div>
+        )
       )}
     </div>
   );

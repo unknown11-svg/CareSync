@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import api from '../services/api';
@@ -22,6 +23,8 @@ function Dashboard() {
     activeReferrals: 0
   });
   const [loading, setLoading] = useState(true);
+  // Add activeTab state for tab switching
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     fetchDashboardStats();
@@ -78,132 +81,60 @@ function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600">Overview of your CareSync system</p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {statCards.map((stat) => (
-          <div key={stat.name} className="card">
-            <div className="flex items-center">
-              <div className={`flex-shrink-0 p-3 rounded-lg ${stat.color}`}>
-                <stat.icon className="h-6 w-6 text-white" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">{stat.name}</p>
-                <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
-              </div>
-            </div>
-            <p className="mt-2 text-xs text-gray-500">{stat.description}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="card">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-          <div className="space-y-3">
-            <button onClick={() => navigate('/facilities')} className="w-full flex items-center justify-between p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-              <div className="flex items-center">
-                <Building2 className="h-5 w-5 text-gray-400 mr-3" />
-                <span className="text-sm font-medium text-gray-900">Add New Facility</span>
-              </div>
-              <span className="text-xs text-gray-500">→</span>
-            </button>
-            <button onClick={() => navigate('/providers')} className="w-full flex items-center justify-between p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-              <div className="flex items-center">
-                <Users className="h-5 w-5 text-gray-400 mr-3" />
-                <span className="text-sm font-medium text-gray-900">Create Provider Account</span>
-              </div>
-              <span className="text-xs text-gray-500">→</span>
-            </button>
-            <button onClick={() => navigate('/providers')} className="w-full flex items-center justify-between p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-              <div className="flex items-center">
-                <Calendar className="h-5 w-5 text-gray-400 mr-3" />
-                <span className="text-sm font-medium text-gray-900">View Recent Activity</span>
-              </div>
-              <span className="text-xs text-gray-500">→</span>
-            </button>
-          </div>
+    <>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600">Overview of your CareSync system</p>
         </div>
 
-        <div className="card">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">System Status</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-          <div className="mb-6 flex gap-4 border-b">
-            <button
-              className={`py-2 px-4 font-semibold ${activeTab === 'overview' ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600'}`}
-              onClick={() => setActiveTab('overview')}
-            >
-              Overview
-            </button>
-            <button
-              className={`py-2 px-4 font-semibold ${activeTab === 'facilities' ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600'}`}
-              onClick={() => setActiveTab('facilities')}
-            >
-              Facilities
-            </button>
-          </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {statCards.map((stat) => (
+            <div key={stat.name} className="card">
+              <div className="flex items-center">
+                <div className={`flex-shrink-0 p-3 rounded-lg ${stat.color}`}>
+                  <stat.icon className="h-6 w-6 text-white" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-500">{stat.name}</p>
+                  <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
+                </div>
+              </div>
+              <p className="mt-2 text-xs text-gray-500">{stat.description}</p>
+            </div>
+          ))}
+        </div>
 
-          {activeTab === 'overview' && (
-            <div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                {/* Example stat cards */}
-                <div className="bg-white rounded shadow p-6">
-                  <div className="text-gray-500">Total Providers</div>
-                  <div className="text-2xl font-bold">{stats.totalProviders}</div>
-                </div>
-                <div className="bg-white rounded shadow p-6">
-                  <div className="text-gray-500">Total Patients</div>
-                  <div className="text-2xl font-bold">{stats.totalPatients}</div>
-                </div>
-                <div className="bg-white rounded shadow p-6">
-                  <div className="text-gray-500">Total Facilities</div>
-                  <div className="text-2xl font-bold">{stats.totalFacilities}</div>
-                </div>
-              </div>
-              <div className="mb-8">
-                <h2 className="text-xl font-bold mb-2">Quick Actions</h2>
-                <div className="flex gap-4">
-                  <Link to="/providers" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Manage Providers</Link>
-                  <Link to="/patients" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Manage Patients</Link>
-                  <Link to="/facilities" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Manage Facilities</Link>
-                </div>
-              </div>
-              <div className="bg-white rounded shadow p-6">
-                <h2 className="text-xl font-bold mb-2">System Status</h2>
-                <div className="text-gray-600">All systems operational.</div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'facilities' && (
-            <Facilities />
-          )}
-              <span className="text-sm text-gray-600">Database Connection</span>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                Connected
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">API Status</span>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                Operational
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Last Backup</span>
-              <span className="text-sm text-gray-900">2 hours ago</span>
-            </div>
+        {/* Quick Actions - Only show once */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-2">Quick Actions</h2>
+          <div className="flex gap-4">
+            <Link to="/admin/providers" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Manage Providers</Link>
+            <Link to="/admin/facilities" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Manage Facilities</Link>
           </div>
         </div>
+        <h2 className="text-xl font-bold mb-2">System Status</h2>
+        <div className="text-gray-600">All systems operational.</div>
+        {activeTab === 'facilities' && (
+          <Facilities />
+        )}
+        <span className="text-sm text-gray-600">Database Connection</span>
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          Connected
+        </span>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600">API Status</span>
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            Operational
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600">Last Backup</span>
+          <span className="text-sm text-gray-900">2 hours ago</span>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
