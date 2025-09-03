@@ -272,6 +272,7 @@ module.exports = {
   createFacility,
   getFacilities,
   updateFacility,
+  deleteFacility,
   createProvider,
   getProviders,
   updateProvider,
