@@ -1,0 +1,151 @@
+import { useEffect, useState } from 'react';
+import api from '../../services/api';
+import { toast } from 'react-hot-toast';
+
+function Slots() {
+  const [slots, setSlots] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [startAt, setStartAt] = useState('');
+  const [endAt, setEndAt] = useState('');
+  const [status, setStatus] = useState('open');
+  const [editModal, setEditModal] = useState({ open: false, slot: null });
+  const [editForm, setEditForm] = useState({ startAt: '', endAt: '', status: 'open' });
+  const [editLoading, setEditLoading] = useState(false);
+  // Open edit modal and prefill form
+  const handleEditSlot = (slot) => {
+    setEditForm({
+      startAt: slot.startAt ? new Date(slot.startAt).toISOString().slice(0, 16) : '',
+      endAt: slot.endAt ? new Date(slot.endAt).toISOString().slice(0, 16) : '',
+      status: slot.status || 'open'
+    });
+    setEditModal({ open: true, slot });
+  };
+
+  // Handle edit form changes
+  const handleEditFormChange = e => {
+    const { name, value } = e.target;
+    setEditForm(f => ({ ...f, [name]: value }));
+  };
+
+  // Submit edit
+  const handleEditSubmit = async e => {
+    e.preventDefault();
+    setEditLoading(true);
+    try {
+      await api.patch(`/provider/slots/${editModal.slot._id}`, editForm);
+      toast.success('Slot updated');
+      setEditModal({ open: false, slot: null });
+      fetchSlots();
+    } catch (e) {
+      toast.error('Failed to update slot');
+    }
+    setEditLoading(false);
+  };
+
+  // Close modal
+  const closeEditModal = () => {
+    setEditModal({ open: false, slot: null });
+  };
+
+  const fetchSlots = async () => {
+    try {
+      const res = await api.get('/provider/slots');
+      setSlots(res.data.slots || []);
+    } catch (e) {
+      toast.error('Failed to load slots');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchSlots(); }, []);
+
+  const createSlot = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/provider/slots', { startAt, endAt, status });
+      toast.success('Slot created');
+      setStartAt('');
+      setEndAt('');
+      setStatus('open');
+      fetchSlots();
+    } catch (e) {
+      toast.error('Failed to create slot');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold text-gray-900">Slots</h2>
+      <form onSubmit={createSlot} className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+        <input type="datetime-local" className="input-field" value={startAt} onChange={(e) => setStartAt(e.target.value)} required />
+        <input type="datetime-local" className="input-field" value={endAt} onChange={(e) => setEndAt(e.target.value)} required />
+        <select className="input-field" value={status} onChange={(e) => setStatus(e.target.value)}>
+          <option value="open">Open</option>
+          <option value="closed">Closed</option>
+        </select>
+        <button type="submit" className="btn-primary">Add Slot</button>
+      </form>
+
+      {loading ? (
+        <div className="text-gray-500">Loading...</div>
+      ) : slots.length === 0 ? (
+        <div className="text-gray-500">No slots yet.</div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3">
+          {slots.map((s) => (
+            <div key={s._id} className="card flex items-center justify-between">
+              <div className="text-sm text-gray-700">
+                {new Date(s.startAt).toLocaleString()} → {new Date(s.endAt).toLocaleString()} ({s.status})
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => handleEditSlot(s)} className="btn-secondary">Edit</button>
+                {s.status !== 'booked' && (
+                  <button onClick={async () => { await api.post(`/provider/slots/${s._id}/book`); toast.success('Booked'); fetchSlots(); }} className="btn-secondary">Book</button>
+                )}
+                <button onClick={async () => { await api.patch(`/provider/slots/${s._id}/status`, { status: s.status === 'closed' ? 'open' : 'closed' }); toast.success('Status updated'); fetchSlots(); }} className="btn-secondary">{s.status === 'closed' ? 'Open' : 'Close'}</button>
+                <button onClick={async () => { await api.delete(`/provider/slots/${s._id}`); toast.success('Deleted'); fetchSlots(); }} className="btn-danger">Delete</button>
+      {/* Edit Slot Modal */}
+      {editModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded shadow-lg p-6 w-full max-w-md relative">
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-black" onClick={closeEditModal}>&times;</button>
+            <h3 className="text-lg font-bold mb-4">Edit Slot</h3>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Start Time</label>
+                <input type="datetime-local" name="startAt" value={editForm.startAt} onChange={handleEditFormChange} className="input-field w-full" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">End Time</label>
+                <input type="datetime-local" name="endAt" value={editForm.endAt} onChange={handleEditFormChange} className="input-field w-full" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Status</label>
+                <select name="status" value={editForm.status} onChange={handleEditFormChange} className="input-field w-full">
+                  <option value="open">Open</option>
+                  <option value="closed">Closed</option>
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <button type="submit" className="btn-primary flex-1" disabled={editLoading}>
+                  {editLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button type="button" className="btn flex-1 border" onClick={closeEditModal} disabled={editLoading}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Slots;
+
+

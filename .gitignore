@@ -2,3 +2,5 @@
 package-lock.json
 ClinicBridge.MD
 ClinicBridge.pdf
+node_modules
+node_modules/

@@ -34,6 +34,16 @@ const mobileClinicSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true
   },
+  // Title of the event
+  title: {
+    type: String,
+    required: true
+  },
+  // Description of the event
+  description: {
+    type: String,
+    default: ''
+  },
   // The type of mobile clinic event. Using an enum to restrict values.
   type: {
     type: String,

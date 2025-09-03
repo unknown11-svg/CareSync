@@ -33,8 +33,16 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/caresync'
 .then(() => console.log('✅ Connected to MongoDB'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
+const eventsRoutes = require('./routes/eventsRoutes');
+
 // Routes
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/provider', require('./routes/providerRoutes'));
+app.use('/api/slots', require('./routes/slotRoutes'));
+app.use('/api/referrals', require('./routes/referralRoutes'));
+app.use('/api/patient', require('./routes/patientRoutes'));
+
+app.use('/api/events', eventsRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

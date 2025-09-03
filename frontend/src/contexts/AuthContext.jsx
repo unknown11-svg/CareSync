@@ -10,26 +10,35 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     // Check for stored token on app load
-    const token = localStorage.getItem('adminToken');
-    if (token) {
+    const token = localStorage.getItem('authToken');
+    const userJson = localStorage.getItem('authUser');
+    if (token && userJson) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // You could verify the token here if needed
-      const userData = JSON.parse(localStorage.getItem('adminUser') || '{}');
-      setUser(userData);
+      setUser(JSON.parse(userJson));
     }
     setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email, password, role = 'admin') => {
     try {
-      const response = await api.post('/admin/login', { email, password });
-      const { token, admin } = response.data;
-      
-      localStorage.setItem('adminToken', token);
-      localStorage.setItem('adminUser', JSON.stringify(admin));
+      let endpoint, profileKey;
+      if (role === 'provider') {
+        endpoint = '/provider/login';
+        profileKey = 'provider';
+      } else if (role === 'patient') {
+        endpoint = '/patient/login';
+        profileKey = 'patient';
+      } else {
+        endpoint = '/admin/login';
+        profileKey = 'admin';
+      }
+      const response = await api.post(endpoint, { email, password });
+      const { token } = response.data;
+      const profile = response.data[profileKey];
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('authUser', JSON.stringify({ ...profile, type: role }));
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      setUser(admin);
+      setUser({ ...profile, type: role });
       toast.success('Login successful!');
       return true;
     } catch (error) {
@@ -40,8 +49,8 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
     delete api.defaults.headers.common['Authorization'];
     setUser(null);
     toast.success('Logged out successfully');
@@ -51,6 +60,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
+    hasPermission: (perm) => Array.isArray(user?.permissions) && user.permissions.includes(perm),
     login,
     logout,
     isAuthenticated,

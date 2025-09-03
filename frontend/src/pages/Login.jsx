@@ -8,16 +8,18 @@ function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user } = useAuth();
+  const [role, setRole] = useState('admin');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     
-    const success = await login(email, password);
+    const success = await login(email, password, role);
     if (success) {
-      navigate('/');
+      const target = role === 'admin' ? '/admin' : role === 'provider' ? '/provider' : '/admin';
+      navigate(target);
     }
     setLoading(false);
   };
@@ -38,6 +40,13 @@ function Login() {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
+            <div className="mb-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sign in as</label>
+              <select value={role} onChange={(e) => setRole(e.target.value)} className="input-field">
+                <option value="admin">Admin</option>
+                <option value="provider">Provider</option>
+              </select>
+            </div>
             <div>
               <label htmlFor="email" className="sr-only">
                 Email address

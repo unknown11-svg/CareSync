@@ -126,5 +126,19 @@ module.exports = {
   verifyToken,
   requireAdmin,
   requireProvider,
-  optionalAuth
+  optionalAuth,
+  requirePermission: (permission) => async (req, res, next) => {
+    try {
+      if (req.userType !== 'provider') {
+        return res.status(403).json({ message: 'Provider access required.' });
+      }
+      const permissions = Array.isArray(req.user?.permissions) ? req.user.permissions : [];
+      if (!permissions.includes(permission)) {
+        return res.status(403).json({ message: 'Permission denied', permission });
+      }
+      next();
+    } catch (error) {
+      res.status(401).json({ message: 'Invalid token.' });
+    }
+  }
 };

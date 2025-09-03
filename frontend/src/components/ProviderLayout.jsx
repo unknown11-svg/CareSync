@@ -1,16 +1,9 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  LayoutDashboard, 
-  Building2, 
-  Users, 
-  LogOut,
-  Menu,
-  X
-} from 'lucide-react';
+import { LayoutDashboard, LogOut, Menu, X, Calendar, FileText, Megaphone, BarChart2 } from 'lucide-react';
 import { useState } from 'react';
 
-function Layout() {
+function ProviderLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -20,15 +13,17 @@ function Layout() {
     navigate('/login');
   };
 
+  const { hasPermission } = useAuth();
   const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { name: 'Facilities', href: '/admin/facilities', icon: Building2 },
-    { name: 'Providers', href: '/admin/providers', icon: Users },
+    { name: 'Dashboard', href: '/provider', icon: LayoutDashboard, show: true },
+    { name: 'Slots', href: '/provider/slots', icon: Calendar, show: hasPermission('manage_slots') },
+    { name: 'Referrals', href: '/provider/referrals', icon: FileText, show: hasPermission('manage_slots') },
+    { name: 'Events', href: '/provider/events', icon: Megaphone, show: hasPermission('manage_events') },
+    { name: 'Analytics', href: '/provider/analytics', icon: BarChart2, show: hasPermission('view_analytics') },
   ];
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-primary-500 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-surface">
@@ -39,7 +34,7 @@ function Layout() {
             </button>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
-            {navigation.map((item) => (
+            {navigation.filter(n => n.show).map((item) => (
               <NavLink
                 key={item.name}
                 to={item.href}
@@ -60,14 +55,13 @@ function Layout() {
         </div>
       </div>
 
-      {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-grow bg-surface border-r border-gray-200">
           <div className="flex h-16 items-center px-4">
             <h1 className="text-xl font-semibold text-primary-500">CareSync</h1>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
-            {navigation.map((item) => (
+            {navigation.filter(n => n.show).map((item) => (
               <NavLink
                 key={item.name}
                 to={item.href}
@@ -87,15 +81,9 @@ function Layout() {
         </div>
       </div>
 
-      {/* Main content */}
       <div className="lg:pl-64">
-        {/* Top bar */}
         <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-surface px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
-          <button
-            type="button"
-            className="-m-2.5 p-2.5 text-primary-500 lg:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
+          <button type="button" className="-m-2.5 p-2.5 text-primary-500 lg:hidden" onClick={() => setSidebarOpen(true)}>
             <Menu className="h-6 w-6" />
           </button>
 
@@ -104,13 +92,8 @@ function Layout() {
             <div className="flex items-center gap-x-4 lg:gap-x-6">
               <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200" />
               <div className="flex items-center gap-x-4">
-                <span className="text-sm text-gray-700">
-                  Welcome, {user?.name}
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-x-2 text-sm text-gray-700 hover:text-primary-500"
-                >
+                <span className="text-sm text-gray-700">Welcome, {user?.name}</span>
+                <button onClick={handleLogout} className="flex items-center gap-x-2 text-sm text-gray-700 hover:text-primary-500">
                   <LogOut className="h-4 w-4" />
                   Logout
                 </button>
@@ -119,7 +102,6 @@ function Layout() {
           </div>
         </div>
 
-        {/* Page content */}
         <main className="py-6">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <Outlet />
@@ -130,4 +112,6 @@ function Layout() {
   );
 }
 
-export default Layout;
+export default ProviderLayout;
+
+
