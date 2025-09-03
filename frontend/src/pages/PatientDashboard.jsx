@@ -1,12 +1,25 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
-import { FaBell } from 'react-icons/fa';
-import { FaRegClock } from 'react-icons/fa';
-import { FaSpinner } from 'react-icons/fa';
+import { FaBell, FaRegClock, FaSpinner } from 'react-icons/fa';
+import SlotPicker from '../components/SlotPicker';
+import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
+
+export default function PatientDashboard() {
+  const { user, loading } = useAuth();
+  const [appointments, setAppointments] = useState([]);
+  const [referrals, setReferrals] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotif, setShowNotif] = useState(false);
+  const [eventActionLoading, setEventActionLoading] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [reminders, setReminders] = useState([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [selectedReferral, setSelectedReferral] = useState(null);
+  const [rescheduleModal, setRescheduleModal] = useState({ open: false, appointmentId: null, departmentId: null });
+  const [error, setError] = useState('');
 
   // Download referral letter as PDF
   const handleDownloadReferral = (ref) => {
@@ -22,9 +35,7 @@ import { FaSpinner } from 'react-icons/fa';
     doc.text(`Date: ${new Date(ref.createdAt).toLocaleString()}`, 20, 85);
     doc.save(`referral_${ref._id}.pdf`);
   };
-import toast from 'react-hot-toast';
-import SlotPicker from '../components/SlotPicker';
-  const [rescheduleModal, setRescheduleModal] = useState({ open: false, appointmentId: null, departmentId: null });
+
   // Cancel appointment handler
   const handleCancel = async (appointmentId) => {
     if (!window.confirm('Are you sure you want to cancel this appointment?')) return;
@@ -55,17 +66,7 @@ import SlotPicker from '../components/SlotPicker';
       toast.error('Failed to reschedule appointment');
     }
   };
-import { useAuth } from '../contexts/AuthContext';
-import api from '../services/api';
 
-  const { user, loading } = useAuth();
-  const [appointments, setAppointments] = useState([]);
-  const [referrals, setReferrals] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-  const [showNotif, setShowNotif] = useState(false);
-  const [eventActionLoading, setEventActionLoading] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState(null);
   // RSVP or cancel RSVP for an event
   const handleEventRSVP = async (eventId, action) => {
     setEventActionLoading(eventId + action);
@@ -81,7 +82,6 @@ import api from '../services/api';
       setEventActionLoading(null);
     }
   };
-  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!user || user.type !== 'patient') return;
@@ -250,19 +250,20 @@ import api from '../services/api';
                         >
                           Reschedule
                         </button>
-      {rescheduleModal.open && (
-        <SlotPicker
-          departmentId={rescheduleModal.departmentId}
-          onSelect={handleSlotSelect}
-          onClose={() => setRescheduleModal({ open: false, appointmentId: null, departmentId: null })}
-        />
-      )}
                       </>
                     )}
                   </div>
                 </li>
               );
             })}
+          {/* Reschedule Modal (outside map) */}
+          {rescheduleModal.open && (
+            <SlotPicker
+              departmentId={rescheduleModal.departmentId}
+              onSelect={handleSlotSelect}
+              onClose={() => setRescheduleModal({ open: false, appointmentId: null, departmentId: null })}
+            />
+          )}
           </ul>
         )}
       </section>
@@ -308,27 +309,27 @@ import api from '../services/api';
                 </li>
               );
             })}
-      {/* Referral Details Modal */}
-      {selectedReferral && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded shadow-lg p-6 w-full max-w-md relative">
-            <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700" onClick={() => setSelectedReferral(null)}>&times;</button>
-            <h2 className="text-lg font-bold mb-4">Referral Details</h2>
-            <div className="mb-2"><b>Referral ID:</b> {selectedReferral._id}</div>
-            {selectedReferral.reason && <div className="mb-2"><b>Reason:</b> {selectedReferral.reason}</div>}
-            {selectedReferral.fromFacilityName && <div className="mb-2"><b>From:</b> {selectedReferral.fromFacilityName}</div>}
-            {selectedReferral.toDepartmentName && <div className="mb-2"><b>To:</b> {selectedReferral.toDepartmentName}</div>}
-            <div className="mb-2"><b>Status:</b> {selectedReferral.status}</div>
-            <div className="mb-2"><b>Created:</b> {new Date(selectedReferral.createdAt).toLocaleString()}</div>
-            <button
-              className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-              onClick={() => handleDownloadReferral(selectedReferral)}
-            >
-              Download Letter
-            </button>
-          </div>
-        </div>
-      )}
+          {/* Referral Details Modal (outside map) */}
+          {selectedReferral && (
+            <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+              <div className="bg-white rounded shadow-lg p-6 w-full max-w-md relative">
+                <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700" onClick={() => setSelectedReferral(null)}>&times;</button>
+                <h2 className="text-lg font-bold mb-4">Referral Details</h2>
+                <div className="mb-2"><b>Referral ID:</b> {selectedReferral._id}</div>
+                {selectedReferral.reason && <div className="mb-2"><b>Reason:</b> {selectedReferral.reason}</div>}
+                {selectedReferral.fromFacilityName && <div className="mb-2"><b>From:</b> {selectedReferral.fromFacilityName}</div>}
+                {selectedReferral.toDepartmentName && <div className="mb-2"><b>To:</b> {selectedReferral.toDepartmentName}</div>}
+                <div className="mb-2"><b>Status:</b> {selectedReferral.status}</div>
+                <div className="mb-2"><b>Created:</b> {new Date(selectedReferral.createdAt).toLocaleString()}</div>
+                <button
+                  className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  onClick={() => handleDownloadReferral(selectedReferral)}
+                >
+                  Download Letter
+                </button>
+              </div>
+            </div>
+          )}
           </ul>
         )}
       </section>
@@ -385,48 +386,48 @@ import api from '../services/api';
                 </li>
               );
             })}
-      {/* Event Details Modal */}
-      {selectedEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded shadow-lg p-6 w-full max-w-md relative">
-            <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700" onClick={() => setSelectedEvent(null)}>&times;</button>
-            <h2 className="text-lg font-bold mb-4">Event Details</h2>
-            <div className="mb-2"><b>Title:</b> {selectedEvent.title}</div>
-            <div className="mb-2"><b>Date:</b> {selectedEvent.startsAt ? new Date(selectedEvent.startsAt).toLocaleString() : ''}</div>
-            <div className="mb-2"><b>Type:</b> {selectedEvent.type}</div>
-            {selectedEvent.description && <div className="mb-2"><b>Description:</b> {selectedEvent.description}</div>}
-            {selectedEvent.services && selectedEvent.services.length > 0 && <div className="mb-2"><b>Services:</b> {selectedEvent.services.join(', ')}</div>}
-            {selectedEvent.location && selectedEvent.location.coordinates && (
-              <div className="mb-2"><b>Location:</b> <a href={`https://maps.google.com/?q=${selectedEvent.location.coordinates[1]},${selectedEvent.location.coordinates[0]}`} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">Map</a></div>
-            )}
-            <div className="mb-2"><b>Capacity:</b> {selectedEvent.capacity}</div>
-            <div className="mb-2"><b>Attending:</b> {selectedEvent.rsvps?.length || 0}</div>
-            <div className="mb-2"><b>RSVP Status:</b> {selectedEvent.rsvps?.find(r => r.patientId === user.id || r.patientId === user._id)?.status === 'yes' ? 'Confirmed' : 'Not confirmed'}</div>
-            <div className="flex gap-2 mt-4">
-              {selectedEvent.rsvps?.find(r => r.patientId === user.id || r.patientId === user._id)?.status === 'yes' ? (
-                <button
-                  className="px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm"
-                  disabled={eventActionLoading === selectedEvent._id + 'cancel'}
-                  onClick={() => handleEventRSVP(selectedEvent._id, 'cancel')}
-                >
-                  {eventActionLoading === selectedEvent._id + 'cancel' ? 'Cancelling...' : 'Cancel RSVP'}
-                </button>
-              ) : (
-                <button
-                  className="px-4 py-2 bg-green-100 text-green-700 rounded hover:bg-green-200 text-sm"
-                  disabled={eventActionLoading === selectedEvent._id + 'yes'}
-                  onClick={() => handleEventRSVP(selectedEvent._id, 'yes')}
-                >
-                  {eventActionLoading === selectedEvent._id + 'yes' ? 'RSVPing...' : 'RSVP'}
-                </button>
-              )}
+          {/* Event Details Modal (outside map) */}
+          {selectedEvent && (
+            <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+              <div className="bg-white rounded shadow-lg p-6 w-full max-w-md relative">
+                <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700" onClick={() => setSelectedEvent(null)}>&times;</button>
+                <h2 className="text-lg font-bold mb-4">Event Details</h2>
+                <div className="mb-2"><b>Title:</b> {selectedEvent.title}</div>
+                <div className="mb-2"><b>Date:</b> {selectedEvent.startsAt ? new Date(selectedEvent.startsAt).toLocaleString() : ''}</div>
+                <div className="mb-2"><b>Type:</b> {selectedEvent.type}</div>
+                {selectedEvent.description && <div className="mb-2"><b>Description:</b> {selectedEvent.description}</div>}
+                {selectedEvent.services && selectedEvent.services.length > 0 && <div className="mb-2"><b>Services:</b> {selectedEvent.services.join(', ')}</div>}
+                {selectedEvent.location && selectedEvent.location.coordinates && (
+                  <div className="mb-2"><b>Location:</b> <a href={`https://maps.google.com/?q=${selectedEvent.location.coordinates[1]},${selectedEvent.location.coordinates[0]}`} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">Map</a></div>
+                )}
+                <div className="mb-2"><b>Capacity:</b> {selectedEvent.capacity}</div>
+                <div className="mb-2"><b>Attending:</b> {selectedEvent.rsvps?.length || 0}</div>
+                <div className="mb-2"><b>RSVP Status:</b> {selectedEvent.rsvps?.find(r => r.patientId === user.id || r.patientId === user._id)?.status === 'yes' ? 'Confirmed' : 'Not confirmed'}</div>
+                <div className="flex gap-2 mt-4">
+                  {selectedEvent.rsvps?.find(r => r.patientId === user.id || r.patientId === user._id)?.status === 'yes' ? (
+                    <button
+                      className="px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm"
+                      disabled={eventActionLoading === selectedEvent._id + 'cancel'}
+                      onClick={() => handleEventRSVP(selectedEvent._id, 'cancel')}
+                    >
+                      {eventActionLoading === selectedEvent._id + 'cancel' ? 'Cancelling...' : 'Cancel RSVP'}
+                    </button>
+                  ) : (
+                    <button
+                      className="px-4 py-2 bg-green-100 text-green-700 rounded hover:bg-green-200 text-sm"
+                      disabled={eventActionLoading === selectedEvent._id + 'yes'}
+                      onClick={() => handleEventRSVP(selectedEvent._id, 'yes')}
+                    >
+                      {eventActionLoading === selectedEvent._id + 'yes' ? 'RSVPing...' : 'RSVP'}
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
           </ul>
         )}
       </section>
     </div>
   );
-
+}

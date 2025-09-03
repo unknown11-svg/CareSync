@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import RSVPConfirmation from './pages/RSVPConfirmation';
 import { Toaster } from 'react-hot-toast';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import AuthProvider, { useAuth } from './contexts/AuthContext';
 import Login from './pages/Login';
 import PatientLogin from './pages/PatientLogin';
 import PatientDashboard from './pages/PatientDashboard';
@@ -42,14 +42,18 @@ function App() {
 
             {/* Admin shell */}
             <Route path="/admin" element={
-              <PrivateRoute roles={["admin"]}>
+              <PrivateRoute roles={["admin", "facility-admin"]}>
                 <Layout />
               </PrivateRoute>
             }>
               <Route index element={<Dashboard />} />
               <Route path="facilities" element={<Facilities />} />
               <Route path="providers" element={<Providers />} />
-              <Route path="hospital" element={<HospitalDashboard />} />
+              <Route path="hospital" element={
+                <PrivateRoute roles={["admin", "facility-admin"]}>
+                  <HospitalDashboard />
+                </PrivateRoute>
+              } />
             </Route>
 
             {/* Provider shell (placeholder) */}

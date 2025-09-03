@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import FilterBar from '../components/FilterBar';
 import Dropdown from '../components/Dropdown';
 
+export default function FacilityProviders({ departments = [] }) {
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -17,20 +18,11 @@ import Dropdown from '../components/Dropdown';
   });
   const [editingId, setEditingId] = useState(null);
   const [formError, setFormError] = useState('');
-  const [departments, setDepartments] = useState([]);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
     fetchProviders();
-    fetchDepartments();
   }, []);
-
-  const fetchDepartments = async () => {
-    try {
-      const res = await api.get('/facility/departments');
-      setDepartments(res.data);
-    } catch {}
-  };
 
   const fetchProviders = async () => {
     setLoading(true);
@@ -135,7 +127,15 @@ import Dropdown from '../components/Dropdown';
                   name="department"
                   value={formData.department}
                   onChange={val => setFormData(prev => ({ ...prev, department: val }))}
-                  options={departments.map(d => ({ value: d.name, label: d.name }))}
+                  options={
+                    Array.from(
+                      new Set(
+                        (departments || [])
+                          .map(d => d && d.name ? d.name : null)
+                          .filter(Boolean)
+                      )
+                    ).map(name => ({ value: name, label: name }))
+                  }
                   placeholder="Select department"
                 />
               </div>
@@ -191,4 +191,4 @@ import Dropdown from '../components/Dropdown';
       )}
     </div>
   );
-
+}

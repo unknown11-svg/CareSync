@@ -1,5 +1,10 @@
+
 import { useState } from 'react';
 import { FaSpinner } from 'react-icons/fa';
+import FacilityPatients from './FacilityPatients';
+import FacilitySlots from './FacilitySlots';
+import FacilityEvents from './FacilityEvents';
+import FacilityReferrals from './FacilityReferrals';
 
 const TABS = [
   { key: 'patients', label: 'Patients' },
@@ -44,16 +49,16 @@ export default function HospitalDashboard() {
       ) : (
         <>
           {activeTab === 'patients' && (
-            <div> {/* TODO: Patient management UI here */} <p>Patient management coming soon...</p> </div>
+            <FacilityPatients />
           )}
           {activeTab === 'referrals' && (
-            <div> {/* TODO: Referrals management UI here */} <p>Referrals management coming soon...</p> </div>
+            <FacilityReferrals />
           )}
           {activeTab === 'slots' && (
-            <div> {/* TODO: Slots management UI here */} <p>Slots management coming soon...</p> </div>
+            <FacilitySlots />
           )}
           {activeTab === 'events' && (
-            <div> {/* TODO: Events management UI here */} <p>Events management coming soon...</p> </div>
+            <FacilityEvents />
           )}
         </>
       )}

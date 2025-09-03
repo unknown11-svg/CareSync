@@ -8,7 +8,13 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 Chart.register(CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement, Tooltip, Legend);
+
+function Analytics() {
   const chartRef = useRef();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
   // Export analytics as CSV
   const handleExportCSV = () => {
     if (!data) return;
@@ -52,11 +58,6 @@ Chart.register(CategoryScale, LinearScale, BarElement, ArcElement, PointElement,
     });
     doc.save('provider-analytics.pdf');
   };
-
-function Analytics() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     api.get('/provider/analytics')
