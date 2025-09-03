@@ -24,6 +24,7 @@ function Layout() {
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Facilities', href: '/admin/facilities', icon: Building2 },
     { name: 'Providers', href: '/admin/providers', icon: Users },
+    { name: 'Hospital Dashboard', href: '/admin/hospital', icon: Building2 },
   ];
 
   return (

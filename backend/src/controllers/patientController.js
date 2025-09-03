@@ -1,3 +1,61 @@
+// Get appointment reminders for the next 24 hours
+const getReminders = async (req, res) => {
+  try {
+    const patientId = req.user._id;
+    // Find referrals for this patient, populate slot
+    const referrals = await Referral.find({ patientId, status: { $in: ['booked', 'confirmed'] } })
+      .populate({ path: 'slotId', model: 'Slot' });
+
+    const now = new Date();
+    const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+    const reminders = referrals
+      .filter(ref => {
+        const slot = ref.slotId;
+        return slot && slot.start_at &&
+          new Date(slot.start_at) > now &&
+          new Date(slot.start_at) <= in24h;
+      })
+      .map(ref => {
+        const slot = ref.slotId;
+        return {
+          appointmentId: ref._id,
+          date: slot.start_at,
+          end: slot.end_at,
+          message: `You have an appointment scheduled for ${slot.start_at ? new Date(slot.start_at).toLocaleString() : ''}.`,
+          rescheduleLink: `/reschedule/${ref._id}`
+        };
+      });
+
+    res.json(reminders);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch reminders', error: error.message });
+  }
+};
+// Mark all notifications as read (for hackathon, just clear all)
+const clearNotifications = async (req, res) => {
+  try {
+    const patientId = req.user._id;
+    const patient = await Patient.findById(patientId);
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+    patient.notifications = [];
+    await patient.save();
+    res.json({ message: 'Notifications cleared' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to clear notifications', error: error.message });
+  }
+};
+// Get notifications for the logged-in patient
+const getNotifications = async (req, res) => {
+  try {
+    const patientId = req.user._id;
+    const patient = await Patient.findById(patientId);
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+    res.json(patient.notifications || []);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch notifications', error: error.message });
+  }
+};
 // Cancel an appointment (referral)
 const cancelAppointment = async (req, res) => {
   try {
@@ -178,5 +236,8 @@ module.exports = {
   getReferrals,
   getEvents,
   cancelAppointment,
-  rescheduleAppointment
+  rescheduleAppointment,
+  getNotifications,
+  clearNotifications,
+  getReminders
 };

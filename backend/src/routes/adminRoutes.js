@@ -16,6 +16,7 @@ router.get('/dashboard/stats', adminController.getDashboardStats);
 router.post('/facilities', adminController.createFacility);
 router.get('/facilities', adminController.getFacilities);
 router.put('/facilities/:id', adminController.updateFacility);
+router.delete('/facilities/:id', adminController.deleteFacility);
 
 // Provider management
 router.post('/providers', adminController.createProvider);

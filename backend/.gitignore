@@ -1,3 +1,5 @@
 node_modules
 seedAdmin.js
 .env
+seedPatients.js
+scripts

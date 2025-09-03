@@ -10,6 +10,8 @@ import {
   TrendingUp,
   Calendar
 } from 'lucide-react';
+import { useContext } from 'react';
+import Facilities from './Facilities';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -133,6 +135,56 @@ function Dashboard() {
           <h3 className="text-lg font-medium text-gray-900 mb-4">System Status</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
+          <div className="mb-6 flex gap-4 border-b">
+            <button
+              className={`py-2 px-4 font-semibold ${activeTab === 'overview' ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600'}`}
+              onClick={() => setActiveTab('overview')}
+            >
+              Overview
+            </button>
+            <button
+              className={`py-2 px-4 font-semibold ${activeTab === 'facilities' ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600'}`}
+              onClick={() => setActiveTab('facilities')}
+            >
+              Facilities
+            </button>
+          </div>
+
+          {activeTab === 'overview' && (
+            <div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {/* Example stat cards */}
+                <div className="bg-white rounded shadow p-6">
+                  <div className="text-gray-500">Total Providers</div>
+                  <div className="text-2xl font-bold">{stats.totalProviders}</div>
+                </div>
+                <div className="bg-white rounded shadow p-6">
+                  <div className="text-gray-500">Total Patients</div>
+                  <div className="text-2xl font-bold">{stats.totalPatients}</div>
+                </div>
+                <div className="bg-white rounded shadow p-6">
+                  <div className="text-gray-500">Total Facilities</div>
+                  <div className="text-2xl font-bold">{stats.totalFacilities}</div>
+                </div>
+              </div>
+              <div className="mb-8">
+                <h2 className="text-xl font-bold mb-2">Quick Actions</h2>
+                <div className="flex gap-4">
+                  <Link to="/providers" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Manage Providers</Link>
+                  <Link to="/patients" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Manage Patients</Link>
+                  <Link to="/facilities" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Manage Facilities</Link>
+                </div>
+              </div>
+              <div className="bg-white rounded shadow p-6">
+                <h2 className="text-xl font-bold mb-2">System Status</h2>
+                <div className="text-gray-600">All systems operational.</div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'facilities' && (
+            <Facilities />
+          )}
               <span className="text-sm text-gray-600">Database Connection</span>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                 Connected

@@ -3,7 +3,9 @@
     "chart.js": "^4.5.0",
     "jspdf": "^3.0.2",
     "jspdf-autotable": "^5.0.2",
+    "leaflet": "^1.9.4",
     "papaparse": "^5.5.3",
-    "react-chartjs-2": "^5.3.0"
+    "react-chartjs-2": "^5.3.0",
+    "react-leaflet": "^5.0.0"
   }
 }

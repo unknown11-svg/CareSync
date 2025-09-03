@@ -1,3 +1,6 @@
+
+// Analytics endpoint
+router.get('/analytics', referralController.getReferralAnalytics);
 const express = require('express');
 const router = express.Router();
 const referralController = require('../controllers/referralController');
