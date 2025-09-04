@@ -22,6 +22,7 @@ router.post('/slots', authMiddleware.requirePermission('manage_slots'), provider
 router.patch('/slots/:slotId/status', authMiddleware.requirePermission('manage_slots'), providerController.setMySlotStatus);
 router.delete('/slots/:slotId', authMiddleware.requirePermission('manage_slots'), providerController.deleteMySlot);
 router.post('/slots/:slotId/book', authMiddleware.requirePermission('manage_slots'), providerController.bookMySlot);
+router.patch('/slots/:slotId', authMiddleware.requirePermission('manage_slots'), providerController.updateMySlot);
 
 router.get('/analytics', authMiddleware.requirePermission('view_analytics'), providerController.getMyAnalytics);
 router.get('/patients', authMiddleware.requirePermission('manage_slots'), providerController.listPatients);

@@ -312,6 +312,28 @@ module.exports = {
     } catch (error) {
       res.status(500).json({ message: 'Error creating event', error: error.message });
     }
+  },
+  // Update a slot's details (startAt, endAt, status) by subdocument id
+  updateMySlot: async (req, res) => {
+    try {
+      const provider = req.user;
+      const { slotId } = req.params;
+      const { startAt, endAt, status } = req.body;
+      if (!provider?.facilityId || !provider?.department) return res.status(400).json({ message: 'Missing context' });
+      const facility = await Facility.findById(provider.facilityId);
+      if (!facility) return res.status(404).json({ message: 'Facility not found' });
+      const dept = (facility.departments || []).find(d => d.name === provider.department);
+      if (!dept) return res.status(404).json({ message: 'Department not found' });
+      const slot = (dept.slots || []).find(s => String(s._id) === String(slotId));
+      if (!slot) return res.status(404).json({ message: 'Slot not found' });
+      if (startAt) slot.startAt = new Date(startAt);
+      if (endAt) slot.endAt = new Date(endAt);
+      if (status) slot.status = status;
+      await facility.save();
+      res.json({ message: 'Slot updated', slotId });
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating slot', error: error.message });
+    }
   }
 };
 

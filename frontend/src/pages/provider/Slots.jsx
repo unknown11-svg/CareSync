@@ -58,6 +58,40 @@ function Slots() {
     fetchSlots();
   }, []);
 
+  // Close the edit modal and reset form
+  const closeEditModal = () => {
+    setEditModal({ open: false, slot: null });
+    setEditForm({ startAt: '', endAt: '', status: 'open' });
+    setEditLoading(false);
+  };
+
+  // Handle edit form field changes
+  const handleEditFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Submit edited slot
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setEditLoading(true);
+    const { startAt, endAt, status } = editForm;
+    if (!startAt || !endAt) return toast.error('Start and end time required');
+    try {
+      await api.patch(`/provider/slots/${editModal.slot._id}`, {
+        startAt,
+        endAt,
+        status
+      });
+      toast.success('Slot updated');
+      closeEditModal();
+      fetchSlots();
+    } catch (err) {
+      toast.error('Failed to update slot');
+      setEditLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6 font-sans bg-background text-text-primary">
       <h2 className="text-xl font-semibold text-myreferrals-accent">Slots</h2>
