@@ -25,6 +25,25 @@ export default function FacilitiesAdminTab() {
     setShowForm(true);
   };
 
+  // Handle form input changes
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Open edit form with facility data
+  const openEditForm = (facility) => {
+    setFormData({
+      name: facility.name || '',
+      type: facility.type || 'hospital',
+      departments: facility.departments || [],
+      latitude: facility.location?.coordinates?.[1]?.toString() || '',
+      longitude: facility.location?.coordinates?.[0]?.toString() || '',
+    });
+    setEditingId(facility._id);
+    setShowForm(true);
+  };
+
   const validateForm = () => {
     if (!formData.name.trim()) return 'Facility name is required';
     if (!formData.type) return 'Facility type is required';
@@ -77,6 +96,26 @@ export default function FacilitiesAdminTab() {
     } catch (err) {
       setFormError('Failed to save facility');
     }
+  };
+
+  // Add a department to the form
+  const handleAddDepartment = () => {
+    const depName = departmentInput.trim();
+    if (!depName) return;
+    if (formData.departments.some(d => d.name === depName)) return;
+    setFormData(prev => ({
+      ...prev,
+      departments: [...prev.departments, { name: depName }]
+    }));
+    setDepartmentInput('');
+  };
+
+  // Remove a department from the form
+  const handleRemoveDepartment = (name) => {
+    setFormData(prev => ({
+      ...prev,
+      departments: prev.departments.filter(d => d.name !== name)
+    }));
   };
 
   useEffect(() => {

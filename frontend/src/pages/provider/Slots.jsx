@@ -46,7 +46,7 @@ function Slots() {
     setLoading(true);
     try {
       const res = await api.get('/provider/slots');
-      setSlots(Array.isArray(res.data) ? res.data : []);
+      setSlots(res.data.slots || []);
     } catch (err) {
       toast.error('Failed to fetch slots');
       setSlots([]);
