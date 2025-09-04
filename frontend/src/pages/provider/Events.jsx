@@ -109,8 +109,8 @@ function Events() {
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-900">Events</h2>
+    <div className="space-y-6 font-sans bg-background text-text-primary">
+      <h2 className="text-xl font-semibold text-myreferrals-accent">Events</h2>
       <form onSubmit={createEvent} className="grid grid-cols-1 gap-4 sm:grid-cols-6">
         <input className="input-field sm:col-span-3" placeholder="Title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required />
         <input className="input-field sm:col-span-3" placeholder="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
@@ -123,26 +123,26 @@ function Events() {
         <input type="number" className="input-field sm:col-span-2" placeholder="Capacity" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} />
         <input className="input-field" placeholder="Longitude" value={form.longitude} onChange={(e) => setForm({ ...form, longitude: e.target.value })} />
         <input className="input-field" placeholder="Latitude" value={form.latitude} onChange={(e) => setForm({ ...form, latitude: e.target.value })} />
-        <button type="submit" className="btn-primary sm:col-span-2">Create Event</button>
+  <button type="submit" className="bg-myreferrals-accent text-white px-4 py-2 rounded hover:bg-myreferrals-accent-hover transition-colors sm:col-span-2">Create Event</button>
       </form>
 
       {loading ? (
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-neutral-gray">Loading...</div>
       ) : events.length === 0 ? (
-        <div className="text-gray-500">No events yet.</div>
+        <div className="text-neutral-gray">No events yet.</div>
       ) : (
         <div className="grid grid-cols-1 gap-3">
           {events.map((ev) => (
-            <div key={ev._id} className="card">
-              <div className="text-lg font-bold text-gray-900">{ev.title}</div>
-              <div className="text-sm text-gray-700 font-medium">{ev.type}</div>
-              <div className="text-sm text-gray-600">{new Date(ev.startsAt).toLocaleString()} • Capacity {ev.capacity}</div>
-              <div className="text-sm text-gray-500">Services: {(ev.services || []).join(', ') || '—'}</div>
-              <div className="text-sm text-gray-500">{ev.description}</div>
-              <div className="text-xs text-gray-400">Location: {ev.location?.coordinates?.join(', ')}</div>
+            <div key={ev._id} className="bg-surface rounded shadow-card p-4">
+              <div className="text-lg font-bold text-myreferrals-accent">{ev.title}</div>
+              <div className="text-sm text-text-secondary font-medium">{ev.type}</div>
+              <div className="text-sm text-neutral-gray">{new Date(ev.startsAt).toLocaleString()} • Capacity {ev.capacity}</div>
+              <div className="text-sm text-neutral-gray">Services: {(ev.services || []).join(', ') || '—'}</div>
+              <div className="text-sm text-neutral-gray">{ev.description}</div>
+              <div className="text-xs text-neutral-gray">Location: {ev.location?.coordinates?.join(', ')}</div>
               <div className="flex gap-2 mt-2">
-                <button className="btn-secondary" onClick={() => openEditModal(ev)}>Edit</button>
-                <button className="btn-danger" onClick={() => handleDelete(ev._id)}>Delete</button>
+                <button className="bg-myreferrals-accent text-white px-3 py-1 rounded hover:bg-myreferrals-accent-hover transition-colors" onClick={() => openEditModal(ev)}>Edit</button>
+                <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors" onClick={() => handleDelete(ev._id)}>Delete</button>
               </div>
             </div>
           ))}
@@ -152,9 +152,9 @@ function Events() {
       {/* Edit Event Modal */}
       {editModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded shadow-lg p-6 w-full max-w-md relative">
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-black" onClick={closeEditModal}>&times;</button>
-            <h3 className="text-lg font-bold mb-4">Edit Event</h3>
+          <div className="bg-surface rounded shadow-card p-6 w-full max-w-md relative">
+            <button className="absolute top-2 right-2 text-neutral-gray hover:text-text-primary" onClick={closeEditModal}>&times;</button>
+            <h3 className="text-lg font-bold mb-4 text-myreferrals-accent">Edit Event</h3>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <input className="input-field w-full" name="title" placeholder="Title" value={editForm.title} onChange={handleEditChange} required />
               <input className="input-field w-full" name="description" placeholder="Description" value={editForm.description} onChange={handleEditChange} />
@@ -168,10 +168,10 @@ function Events() {
               <input className="input-field w-full" name="longitude" placeholder="Longitude" value={editForm.longitude} onChange={handleEditChange} />
               <input className="input-field w-full" name="latitude" placeholder="Latitude" value={editForm.latitude} onChange={handleEditChange} />
               <div className="flex gap-2">
-                <button type="submit" className="btn-primary flex-1" disabled={editLoading}>
+                <button type="submit" className="bg-myreferrals-accent text-white px-4 py-2 rounded hover:bg-myreferrals-accent-hover transition-colors flex-1" disabled={editLoading}>
                   {editLoading ? 'Saving...' : 'Save Changes'}
                 </button>
-                <button type="button" className="btn flex-1 border" onClick={closeEditModal} disabled={editLoading}>Cancel</button>
+                <button type="button" className="bg-surface border border-neutral-gray text-text-primary px-4 py-2 rounded flex-1" onClick={closeEditModal} disabled={editLoading}>Cancel</button>
               </div>
             </form>
           </div>

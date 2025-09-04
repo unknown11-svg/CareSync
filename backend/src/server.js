@@ -36,13 +36,14 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/caresync'
 const eventsRoutes = require('./routes/eventsRoutes');
 
 // Routes
+
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/provider', require('./routes/providerRoutes'));
 app.use('/api/slots', require('./routes/slotRoutes'));
 app.use('/api/referrals', require('./routes/referralRoutes'));
 app.use('/api/patient', require('./routes/patientRoutes'));
-
-
+app.use('/api/facilities', require('./routes/facilitiesRoutes'));
+app.use('/api/departments', require('./routes/departmentsRoutes'));
 app.use('/api/facility-admin', require('./routes/facilityAdminRoutes'));
 app.use('/api/events', eventsRoutes);
 

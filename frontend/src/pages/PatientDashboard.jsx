@@ -121,34 +121,34 @@ export default function PatientDashboard() {
   const unreadCount = notifications.length;
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+  <div className="max-w-4xl mx-auto p-6 bg-background text-text-primary font-sans">
       {/* 24-hour Reminders Section */}
       {reminders.length > 0 && (
         <section className="mb-8 animate-fade-in">
           <div className="flex items-center mb-2">
-            <FaRegClock className="text-2xl text-yellow-500 mr-2 animate-pulse" />
-            <h2 className="text-lg font-bold tracking-tight text-yellow-700 drop-shadow">Upcoming in 24 Hours</h2>
+            <FaRegClock className="text-2xl text-patients-accent mr-2 animate-pulse" />
+            <h2 className="text-lg font-bold tracking-tight text-patients-accent drop-shadow">Upcoming in 24 Hours</h2>
           </div>
-          <ul className="divide-y bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-300 rounded-xl shadow-sm">
+          <ul className="divide-y bg-surface border border-patients-accent rounded-card shadow-card">
             {reminders.map(rem => {
               // Highlight if within 2 hours
               const soon = rem.date && (new Date(rem.date) - new Date()) < 2 * 60 * 60 * 1000;
               return (
                 <li
                   key={rem.appointmentId}
-                  className={`p-4 flex flex-col md:flex-row md:items-center md:justify-between transition-all duration-300 ${soon ? 'bg-yellow-200/80 border-l-4 border-yellow-500 shadow-md' : ''}`}
+                  className={`p-4 flex flex-col md:flex-row md:items-center md:justify-between transition-all duration-300 ${soon ? 'bg-patients-accent-hover border-l-4 border-patients-accent shadow-md' : ''}`}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 mr-2 border border-yellow-300">
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-patients-accent-hover text-patients-accent mr-2 border border-patients-accent">
                       <FaRegClock className="text-lg" />
                     </span>
                     <div>
-                      <div className="font-semibold text-yellow-900">{rem.message}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">{rem.date ? new Date(rem.date).toLocaleString() : ''}</div>
+                      <div className="font-semibold text-patients-accent">{rem.message}</div>
+                      <div className="text-xs text-neutral-gray mt-0.5">{rem.date ? new Date(rem.date).toLocaleString() : ''}</div>
                     </div>
                   </div>
                   <button
-                    className="mt-3 md:mt-0 px-4 py-1.5 bg-gradient-to-r from-blue-200 to-blue-100 text-blue-800 font-semibold rounded-lg hover:from-blue-300 hover:to-blue-200 shadow-sm border border-blue-200 transition-colors"
+                    className="mt-3 md:mt-0 px-4 py-1.5 bg-patients-accent text-white font-semibold rounded-lg hover:bg-patients-accent-hover shadow-sm border border-patients-accent transition-colors"
                     onClick={() => handleReschedule(rem.appointmentId)}
                   >
                     Reschedule
@@ -163,18 +163,18 @@ export default function PatientDashboard() {
         <h1 className="text-2xl font-bold">Welcome, {user.name || user.email}</h1>
         <div className="relative">
           <button className="relative" onClick={() => setShowNotif(v => !v)}>
-            <FaBell className="text-2xl text-gray-700" />
+            <FaBell className="text-2xl text-patients-accent" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">{unreadCount}</span>
             )}
           </button>
           {showNotif && (
-            <div className="absolute right-0 mt-2 w-80 bg-white border rounded shadow-lg z-50 max-h-96 overflow-y-auto">
+            <div className="absolute right-0 mt-2 w-80 bg-surface border border-patients-accent rounded-card shadow-card z-50 max-h-96 overflow-y-auto">
               <div className="p-3 border-b font-semibold flex items-center justify-between">
                 <span>Notifications</span>
                 {notifications.length > 0 && (
                   <button
-                    className="text-xs text-blue-600 hover:underline ml-2"
+                    className="text-xs text-patients-accent hover:underline ml-2"
                     onClick={async () => {
                       try {
                         await api.post('/patient/notifications/clear');
@@ -188,13 +188,13 @@ export default function PatientDashboard() {
                 )}
               </div>
               {notifications.length === 0 ? (
-                <div className="p-4 text-gray-500">No notifications.</div>
+                <div className="p-4 text-neutral-gray">No notifications.</div>
               ) : (
                 <ul>
                   {notifications.slice().reverse().map((notif, idx) => (
-                    <li key={idx} className="px-4 py-2 border-b last:border-b-0 text-sm text-gray-700">
+                    <li key={idx} className="px-4 py-2 border-b last:border-b-0 text-sm text-text-secondary">
                       <div>{notif.message}</div>
-                      <div className="text-xs text-gray-400 mt-1">{notif.sentAt ? new Date(notif.sentAt).toLocaleString() : ''}</div>
+                      <div className="text-xs text-neutral-gray mt-1">{notif.sentAt ? new Date(notif.sentAt).toLocaleString() : ''}</div>
                     </li>
                   ))}
                 </ul>
@@ -205,18 +205,18 @@ export default function PatientDashboard() {
       </div>
       {error && <div className="text-red-500 mb-4">{error}</div>}
       <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">Upcoming Appointments</h2>
+        <h2 className="text-xl font-semibold mb-2 text-patients-accent">Upcoming Appointments</h2>
         {appointments.length === 0 ? (
-          <div className="text-gray-400 flex flex-col items-center">
+          <div className="text-neutral-gray flex flex-col items-center">
             <span className="text-5xl mb-2">📅</span>
             No appointments found.
           </div>
         ) : (
           <ul className="divide-y">
             {appointments.map(appt => {
-              let statusColor = 'text-gray-500';
+              let statusColor = 'text-neutral-gray';
               if (appt.status === 'confirmed') statusColor = 'text-green-600';
-              else if (appt.status === 'booked') statusColor = 'text-blue-600';
+              else if (appt.status === 'booked') statusColor = 'text-patients-accent';
               else if (appt.status === 'cancelled') statusColor = 'text-red-600';
               return (
                 <li key={appt._id} className="py-3 flex flex-col gap-1 border-l-4 pl-3 mb-2" style={{ borderColor: appt.status === 'confirmed' ? '#16a34a' : appt.status === 'booked' ? '#2563eb' : appt.status === 'cancelled' ? '#dc2626' : '#6b7280' }}>
@@ -229,7 +229,7 @@ export default function PatientDashboard() {
                     </span>
                     <span className={`ml-2 text-sm font-semibold ${statusColor}`}>Status: {appt.status}</span>
                   </div>
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-700 mt-1">
+                  <div className="flex flex-wrap gap-4 text-sm text-text-secondary mt-1">
                     {appt.provider && <span>Provider: {appt.provider.name}</span>}
                     {appt.department && <span>Department: {appt.department}</span>}
                     {appt.facility && <span>Facility: {appt.facility.name}</span>}
@@ -268,18 +268,18 @@ export default function PatientDashboard() {
         )}
       </section>
       <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">Referrals</h2>
+        <h2 className="text-xl font-semibold mb-2 text-myreferrals-accent">Referrals</h2>
         {referrals.length === 0 ? (
-          <div className="text-gray-400 flex flex-col items-center">
+          <div className="text-neutral-gray flex flex-col items-center">
             <span className="text-5xl mb-2">📄</span>
             No referrals found.
           </div>
         ) : (
           <ul className="divide-y">
             {referrals.map(ref => {
-              let statusColor = 'text-gray-500';
+              let statusColor = 'text-neutral-gray';
               if (ref.status === 'confirmed') statusColor = 'text-green-600';
-              else if (ref.status === 'booked') statusColor = 'text-blue-600';
+              else if (ref.status === 'booked') statusColor = 'text-patients-accent';
               else if (ref.status === 'cancelled') statusColor = 'text-red-600';
               return (
                 <li key={ref._id} className="py-3 flex flex-col gap-1 border-l-4 pl-3 mb-2" style={{ borderColor: ref.status === 'confirmed' ? '#16a34a' : ref.status === 'booked' ? '#2563eb' : ref.status === 'cancelled' ? '#dc2626' : '#6b7280' }}>
@@ -287,7 +287,7 @@ export default function PatientDashboard() {
                     <span className="font-medium">Referral ID: {ref._id}</span>
                     <span className={`ml-2 text-sm font-semibold ${statusColor}`}>Status: {ref.status}</span>
                   </div>
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-700 mt-1">
+                  <div className="flex flex-wrap gap-4 text-sm text-text-secondary mt-1">
                     {ref.reason && <span>Reason: {ref.reason}</span>}
                     {ref.fromFacilityName && <span>From: {ref.fromFacilityName}</span>}
                     {ref.toDepartmentName && <span>To: {ref.toDepartmentName}</span>}
@@ -312,8 +312,8 @@ export default function PatientDashboard() {
           {/* Referral Details Modal (outside map) */}
           {selectedReferral && (
             <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-              <div className="bg-white rounded shadow-lg p-6 w-full max-w-md relative">
-                <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700" onClick={() => setSelectedReferral(null)}>&times;</button>
+              <div className="bg-surface rounded-card shadow-lg p-6 w-full max-w-md relative">
+                <button className="absolute top-2 right-2 text-neutral-gray hover:text-text-primary" onClick={() => setSelectedReferral(null)}>&times;</button>
                 <h2 className="text-lg font-bold mb-4">Referral Details</h2>
                 <div className="mb-2"><b>Referral ID:</b> {selectedReferral._id}</div>
                 {selectedReferral.reason && <div className="mb-2"><b>Reason:</b> {selectedReferral.reason}</div>}
@@ -334,9 +334,9 @@ export default function PatientDashboard() {
         )}
       </section>
       <section>
-        <h2 className="text-xl font-semibold mb-2">Events</h2>
+        <h2 className="text-xl font-semibold mb-2 text-myreferrals-accent">Events</h2>
         {events.length === 0 ? (
-          <div className="text-gray-400 flex flex-col items-center">
+          <div className="text-neutral-gray flex flex-col items-center">
             <span className="text-5xl mb-2">🎪</span>
             No events found.
           </div>
@@ -346,23 +346,23 @@ export default function PatientDashboard() {
               // Find this patient's RSVP
               const myRSVP = evt.rsvps?.find(r => r.patientId === user.id || r.patientId === user._id);
               return (
-                <li key={evt._id} className="py-3 flex flex-col gap-1 border-l-4 pl-3 mb-2 border-blue-300">
+                <li key={evt._id} className="py-3 flex flex-col gap-1 border-l-4 pl-3 mb-2 border-myreferrals-accent">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                    <span className="font-medium text-lg cursor-pointer underline hover:text-blue-700" onClick={() => setSelectedEvent(evt)}>{evt.title}</span>
-                    <span className="text-sm text-gray-500">{evt.startsAt ? new Date(evt.startsAt).toLocaleString() : ''}</span>
+                    <span className="font-medium text-lg cursor-pointer underline hover:text-myreferrals-accent" onClick={() => setSelectedEvent(evt)}>{evt.title}</span>
+                    <span className="text-sm text-neutral-gray">{evt.startsAt ? new Date(evt.startsAt).toLocaleString() : ''}</span>
                   </div>
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-700 mt-1">
+                  <div className="flex flex-wrap gap-4 text-sm text-text-secondary mt-1">
                     <span>Type: {evt.type}</span>
                     {evt.description && <span>Description: {evt.description}</span>}
                     {evt.services && evt.services.length > 0 && <span>Services: {evt.services.join(', ')}</span>}
                     {evt.location && evt.location.coordinates && (
-                      <span>Location: <a href={`https://maps.google.com/?q=${evt.location.coordinates[1]},${evt.location.coordinates[0]}`} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">Map</a></span>
+                      <span>Location: <a href={`https://maps.google.com/?q=${evt.location.coordinates[1]},${evt.location.coordinates[0]}`} target="_blank" rel="noopener noreferrer" className="underline text-myreferrals-accent">Map</a></span>
                     )}
                     <span>Capacity: {evt.capacity}</span>
                     <span>Attending: {evt.rsvps?.length || 0}</span>
                   </div>
                   <div className="flex gap-2 mt-2 items-center">
-                    <span className={myRSVP?.status === 'yes' ? 'text-green-600 font-semibold' : 'text-gray-500'}>
+                    <span className={myRSVP?.status === 'yes' ? 'text-green-600 font-semibold' : 'text-neutral-gray'}>
                       RSVP: {myRSVP?.status === 'yes' ? 'Confirmed' : 'Not confirmed'}
                     </span>
                     {myRSVP?.status === 'yes' ? (
@@ -389,8 +389,8 @@ export default function PatientDashboard() {
           {/* Event Details Modal (outside map) */}
           {selectedEvent && (
             <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-              <div className="bg-white rounded shadow-lg p-6 w-full max-w-md relative">
-                <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700" onClick={() => setSelectedEvent(null)}>&times;</button>
+              <div className="bg-surface rounded-card shadow-lg p-6 w-full max-w-md relative">
+                <button className="absolute top-2 right-2 text-neutral-gray hover:text-text-primary" onClick={() => setSelectedEvent(null)}>&times;</button>
                 <h2 className="text-lg font-bold mb-4">Event Details</h2>
                 <div className="mb-2"><b>Title:</b> {selectedEvent.title}</div>
                 <div className="mb-2"><b>Date:</b> {selectedEvent.startsAt ? new Date(selectedEvent.startsAt).toLocaleString() : ''}</div>
@@ -398,7 +398,7 @@ export default function PatientDashboard() {
                 {selectedEvent.description && <div className="mb-2"><b>Description:</b> {selectedEvent.description}</div>}
                 {selectedEvent.services && selectedEvent.services.length > 0 && <div className="mb-2"><b>Services:</b> {selectedEvent.services.join(', ')}</div>}
                 {selectedEvent.location && selectedEvent.location.coordinates && (
-                  <div className="mb-2"><b>Location:</b> <a href={`https://maps.google.com/?q=${selectedEvent.location.coordinates[1]},${selectedEvent.location.coordinates[0]}`} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">Map</a></div>
+                  <div className="mb-2"><b>Location:</b> <a href={`https://maps.google.com/?q=${selectedEvent.location.coordinates[1]},${selectedEvent.location.coordinates[0]}`} target="_blank" rel="noopener noreferrer" className="underline text-myreferrals-accent">Map</a></div>
                 )}
                 <div className="mb-2"><b>Capacity:</b> {selectedEvent.capacity}</div>
                 <div className="mb-2"><b>Attending:</b> {selectedEvent.rsvps?.length || 0}</div>

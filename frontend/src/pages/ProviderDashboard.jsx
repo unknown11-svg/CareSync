@@ -1,24 +1,36 @@
 import { useState } from 'react';
-import { FaSpinner } from 'react-icons/fa';
+import Slots from './provider/Slots';
+import Referrals from './provider/Referrals';
+import Events from './provider/Events';
+import Analytics from './provider/Analytics';
+
+const TABS = [
+  { key: 'slots', label: 'Slots', component: <Slots /> },
+  { key: 'referrals', label: 'Referrals', component: <Referrals /> },
+  { key: 'events', label: 'Events', component: <Events /> },
+  { key: 'analytics', label: 'Analytics', component: <Analytics /> },
+];
 
 function ProviderDashboard() {
-  const [loading, setLoading] = useState(false);
-  // Simulate loading for dashboard switch (optional, can be removed if not needed)
-  // Add tab logic here if needed in the future
+  const [tab, setTab] = useState('slots');
 
   return (
-    <div className="space-y-6">
-      {loading ? (
-        <div className="flex flex-col items-center justify-center min-h-[20vh]">
-          <FaSpinner className="animate-spin text-3xl text-blue-400 mb-2" />
-          <div className="text-gray-500">Loading...</div>
-        </div>
-      ) : (
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Provider Dashboard</h1>
-          <p className="text-gray-600">Coming soon: slots, referrals, events</p>
-        </div>
-      )}
+    <div className="space-y-6 font-sans bg-background text-text-primary p-4">
+      <h1 className="text-2xl font-bold text-slots-accent mb-2">Provider Dashboard</h1>
+      <div className="flex gap-2 border-b border-neutral-gray mb-4">
+        {TABS.map(t => (
+          <button
+            key={t.key}
+            className={`px-4 py-2 -mb-px border-b-2 font-medium transition-colors ${tab === t.key ? 'border-slots-accent text-slots-accent' : 'border-transparent text-neutral-gray hover:text-slots-accent hover:border-slots-accent-hover'}`}
+            onClick={() => setTab(t.key)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <div>
+        {TABS.find(t => t.key === tab)?.component}
+      </div>
     </div>
   );
 }

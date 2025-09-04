@@ -22,42 +22,7 @@ export default function FacilitiesAdminTab() {
   const openCreateForm = () => {
     setFormData({ name: '', type: 'hospital', departments: [], latitude: '', longitude: '' });
     setEditingId(null);
-    setFormError('');
     setShowForm(true);
-  };
-
-  const openEditForm = (facility) => {
-    setFormData({
-      name: facility.name,
-      type: facility.type,
-      departments: facility.departments ? [...facility.departments] : [],
-      latitude: facility.location?.coordinates?.[1]?.toString() || '',
-      longitude: facility.location?.coordinates?.[0]?.toString() || '',
-    });
-    setEditingId(facility._id);
-    setFormError('');
-    setShowForm(true);
-  };
-
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleAddDepartment = () => {
-    const name = departmentInput.trim();
-    if (!name) return;
-    if (formData.departments.some(d => d.name.toLowerCase() === name.toLowerCase())) {
-      setFormError('Department already exists');
-      return;
-    }
-    setFormData(prev => ({ ...prev, departments: [...prev.departments, { name }] }));
-    setDepartmentInput('');
-    setFormError('');
-  };
-
-  const handleRemoveDepartment = (name) => {
-    setFormData(prev => ({ ...prev, departments: prev.departments.filter(d => d.name !== name) }));
   };
 
   const validateForm = () => {
@@ -238,5 +203,6 @@ export default function FacilitiesAdminTab() {
         </table>
       )}
     </div>
+
   );
 }

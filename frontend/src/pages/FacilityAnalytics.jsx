@@ -46,38 +46,38 @@ export default function FacilityAnalytics() {
   };
 
   return (
-    <div>
-      <h2 className="text-lg font-bold mb-4">Facility Analytics</h2>
+    <div className="font-sans bg-background text-text-primary">
+      <h2 className="text-lg font-bold mb-4 text-slots-accent">Facility Analytics</h2>
       {loading ? (
         <Loader message="Loading analytics..." />
       ) : !stats ? (
-        <div className="text-gray-500">No analytics data available.</div>
+        <div className="text-neutral-gray">No analytics data available.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded shadow p-6">
-            <div className="text-gray-500">Total Patients</div>
+          <div className="bg-surface rounded shadow-card p-6">
+            <div className="text-slots-accent">Total Patients</div>
             <div className="text-2xl font-bold">{stats.totalPatients}</div>
           </div>
-          <div className="bg-white rounded shadow p-6">
-            <div className="text-gray-500">Active Slots</div>
+          <div className="bg-surface rounded shadow-card p-6">
+            <div className="text-slots-accent">Active Slots</div>
             <div className="text-2xl font-bold">{stats.activeSlots}</div>
           </div>
-          <div className="bg-white rounded shadow p-6">
-            <div className="text-gray-500">Upcoming Events</div>
+          <div className="bg-surface rounded shadow-card p-6">
+            <div className="text-slots-accent">Upcoming Events</div>
             <div className="text-2xl font-bold">{stats.upcomingEvents}</div>
           </div>
-          <div className="bg-white rounded shadow p-6">
-            <div className="text-gray-500">Providers</div>
+          <div className="bg-surface rounded shadow-card p-6">
+            <div className="text-slots-accent">Providers</div>
             <div className="text-2xl font-bold">{stats.providers}</div>
           </div>
-          <div className="bg-white rounded shadow p-6">
-            <div className="text-gray-500">Departments</div>
+          <div className="bg-surface rounded shadow-card p-6">
+            <div className="text-slots-accent">Departments</div>
             <div className="text-2xl font-bold">{stats.departments}</div>
           </div>
         </div>
       )}
       {/* Referral Analytics Charts */}
-      <div className="bg-white rounded shadow p-6 mt-6">
+      <div className="bg-surface rounded shadow-card p-6 mt-6">
         <h3 className="text-md font-semibold mb-4">Referral Status Breakdown</h3>
         {referralAnalytics && referralAnalytics.statusCounts ? (
           <div className="max-w-xs mx-auto">

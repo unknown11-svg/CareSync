@@ -1,3 +1,17 @@
+// List referrals for provider, with populated fields
+const listReferrals = async (req, res) => {
+  try {
+    // Optionally filter by provider's facility or department if needed
+    const referrals = await Referral.find({})
+      .populate({ path: 'patientId', select: 'name surname phone preferredLanguage consented' })
+      .populate({ path: 'fromFacilityId', select: 'name' })
+      .populate({ path: 'toDepartmentId', select: 'name' })
+      .populate({ path: 'slotId', select: 'start_at end_at status' });
+    res.json(referrals);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching referrals', error: error.message });
+  }
+};
 
 const Referral = require('../models/referral');
 const Slot = require('../models/slot');
@@ -5,6 +19,7 @@ const Provider = require('../models/provider');
 const Facility = require('../models/facilities');
 const MobileClinic = require('../models/events');
 const jwt = require('jsonwebtoken');
+const Patient = require('../models/patients');
 
 // Provider authentication
 const providerLogin = async (req, res) => {
@@ -49,6 +64,7 @@ const providerLogin = async (req, res) => {
 
 module.exports = {
   providerLogin,
+  listReferrals,
   // Edit an event for provider facility
   updateMyEvent: async (req, res) => {
     try {
@@ -70,6 +86,17 @@ module.exports = {
       res.status(500).json({ message: 'Error updating event', error: error.message });
     }
   },
+    // List all patients (for provider referrals)
+    listPatients: async (req, res) => {
+      try {
+        // Optionally, filter by facility or other logic if needed
+        const patients = await Patient.find({}, '_id name surname phone preferredLanguage consented');
+        res.json(patients);
+      } catch (error) {
+        console.error(error); // Log the real error for debugging
+        res.status(500).json({ message: 'Error fetching patients', error: error.message });
+      }
+    },
   // Delete an event for provider facility
   deleteMyEvent: async (req, res) => {
     try {

@@ -31,9 +31,30 @@ export default {
           800: '#4e3d1a',
           900: '#281d0e',
         },
-        background: '#F3F3F3',
-        surface: '#FFFFFF',
-      }
+        background: '#f9fafb',
+        surface: '#ffffff',
+        'patients-accent': '#2563eb', // Blue
+        'facility-accent': '#059669', // Teal/Green
+        'slots-accent': '#7c3aed', // Purple
+        'myreferrals-accent': '#f97316', // Orange/Coral
+        'neutral-gray': '#6b7280',
+        'text-primary': '#111827',
+        'text-secondary': '#374151',
+        // Accent hover (20% opacity)
+        'patients-accent-hover': '#2563eb33',
+        'facility-accent-hover': '#05966933',
+        'slots-accent-hover': '#7c3aed33',
+        'myreferrals-accent-hover': '#f9731633',
+      },
+      fontFamily: {
+        sans: ['Inter', 'Roboto', 'ui-sans-serif', 'system-ui'],
+      },
+      boxShadow: {
+        card: '0 1px 3px 0 rgba(0,0,0,0.07), 0 1px 2px 0 rgba(0,0,0,0.06)',
+      },
+      borderRadius: {
+        card: '0.75rem',
+      },
     },
   },
   plugins: [],

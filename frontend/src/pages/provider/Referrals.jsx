@@ -92,8 +92,8 @@ function Referrals() {
 
   // Fetch facilities and patients on mount
   useEffect(() => {
-    api.get('/admin/facilities').then(res => setFacilities(res.data)).catch(() => setFacilities([]));
-    api.get('/admin/patients').then(res => setPatients(res.data)).catch(() => setPatients([]));
+    api.get('/facilities').then(res => setFacilities(res.data)).catch(() => setFacilities([]));
+    api.get('/provider/patients').then(res => setPatients(res.data)).catch(() => setPatients([]));
     fetchReferrals();
   }, []);
 
@@ -102,7 +102,7 @@ function Referrals() {
     setReferralsLoading(true);
     setReferralsError('');
     try {
-      const res = await api.get('/referrals');
+      const res = await api.get('/provider/referrals');
       setReferrals(res.data);
     } catch (err) {
       setReferralsError('Could not load referrals.');
@@ -112,8 +112,9 @@ function Referrals() {
 
   // Fetch departments when facility changes
   useEffect(() => {
+
     if (form.fromFacilityId) {
-      api.get(`/admin/facilities/${form.fromFacilityId}/departments`)
+      api.get(`/departments/${form.fromFacilityId}/departments`)
         .then(res => setDepartments(res.data))
         .catch(() => setDepartments([]));
     } else {
@@ -251,10 +252,14 @@ function Referrals() {
               <tbody>
                 {referrals.map(r => (
                   <tr key={r._id}>
-                    <td className="p-2 border">{r.patientId?.name || r.patientId || '-'}</td>
-                    <td className="p-2 border">{r.fromFacilityId?.name || r.fromFacilityId || '-'}</td>
-                    <td className="p-2 border">{r.toDepartmentId?.name || r.toDepartmentId || '-'}</td>
-                    <td className="p-2 border">{r.slotId ? `${new Date(r.slotId.start_at).toLocaleString()}` : '-'}</td>
+                    <td className="p-2 border">{r.patientId ? `${r.patientId.name} ${r.patientId.surname}` : '-'}</td>
+                    <td className="p-2 border">{r.fromFacilityId?.name || '-'}</td>
+                    <td className="p-2 border">{r.toDepartmentId?.name || '-'}</td>
+                    <td className="p-2 border">{r.slotId ? `${
+                      r.slotId.start_at || r.slotId.startAt ? new Date(r.slotId.start_at || r.slotId.startAt).toLocaleString() : '-'
+                    } - ${
+                      r.slotId.end_at || r.slotId.endAt ? new Date(r.slotId.end_at || r.slotId.endAt).toLocaleTimeString() : '-'
+                    }` : '-'}</td>
                     <td className="p-2 border">{r.status}</td>
                     <td className="p-2 border flex gap-2 items-center">
                       {r.status !== 'cancelled' ? (
@@ -276,6 +281,13 @@ function Referrals() {
                         <span className="text-gray-400">Cancelled</span>
                       )}
                     </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
       {/* Edit Referral Modal */}
       {editModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
@@ -303,26 +315,19 @@ function Referrals() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Notes</label>
-                <textarea name="notes" value={editForm.notes} onChange={handleEditFormChange} className="w-full border rounded p-2" rows={2} />
+                <input type="text" name="notes" value={editForm.notes} onChange={handleEditFormChange} className="w-full border rounded p-2" />
               </div>
               {editError && <div className="bg-red-100 text-red-700 p-2 rounded text-sm">{editError}</div>}
               <div className="flex gap-2">
-                <button type="submit" className="btn btn-primary flex-1" disabled={editLoading}>
+                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex-1" disabled={editLoading}>
                   {editLoading ? 'Saving...' : 'Save Changes'}
                 </button>
-                <button type="button" className="btn flex-1 border" onClick={closeEditModal} disabled={editLoading}>Cancel</button>
+                <button type="button" className="bg-gray-200 text-gray-800 px-4 py-2 rounded flex-1" onClick={closeEditModal} disabled={editLoading}>Cancel</button>
               </div>
             </form>
           </div>
         </div>
       )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

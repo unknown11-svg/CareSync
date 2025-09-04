@@ -15,9 +15,7 @@ router.get('/dashboard', (req, res) => {
 });
 
 // Example protected resources with permissions
-router.get('/referrals', authMiddleware.requirePermission('manage_slots'), (req, res) => {
-  res.json([]);
-});
+router.get('/referrals', authMiddleware.requirePermission('manage_slots'), providerController.listReferrals);
 
 router.get('/slots', authMiddleware.requirePermission('manage_slots'), providerController.getMySlots);
 router.post('/slots', authMiddleware.requirePermission('manage_slots'), providerController.createMySlot);
@@ -26,6 +24,7 @@ router.delete('/slots/:slotId', authMiddleware.requirePermission('manage_slots')
 router.post('/slots/:slotId/book', authMiddleware.requirePermission('manage_slots'), providerController.bookMySlot);
 
 router.get('/analytics', authMiddleware.requirePermission('view_analytics'), providerController.getMyAnalytics);
+router.get('/patients', authMiddleware.requirePermission('manage_slots'), providerController.listPatients);
 
 // Events (manage_events)
 router.get('/events', authMiddleware.requirePermission('manage_events'), providerController.listMyEvents);
