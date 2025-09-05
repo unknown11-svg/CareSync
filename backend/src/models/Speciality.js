@@ -19,7 +19,7 @@ const specialitySchema = new mongoose.Schema({
     required: true,
   },
   services: {
-    type: String,
+    type: [String],
     required: true,
   },
   referralContact: {

@@ -416,7 +416,6 @@ const FacilitiesAdminTab = () => {
                     <td>
                       <div className="d-flex flex-column">
                         <strong>{f.name || 'Unnamed Facility'}</strong>
-                        <small className="text-muted">{f.description || 'No description'}</small>
                       </div>
                     </td>
                     <td>
