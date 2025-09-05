@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
+import { AuthContext } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 
@@ -13,6 +14,15 @@ function Slots() {
   const [editLoading, setEditLoading] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
+  const [provider, setProvider] = useState(null);
+  const { user } = useContext(AuthContext);
+
+  
+  useEffect(() => {
+    if (user && user.type === 'provider' && user.department) {
+      setProvider(user);
+    }
+  }, [user]);
 
   // Open edit modal and prefill form
   const handleEditSlot = (slot) => {
@@ -28,9 +38,10 @@ function Slots() {
   const createSlot = async (e) => {
     e.preventDefault();
     if (!startAt || !endAt) return toast.error('Start and end time required');
-    console.log({ startAt, endAt, status });
+    console.log({ department: provider?.department, startAt, endAt, status });
     try {
       await api.post('/provider/slots', {
+        department: provider?.department,
         startAt,
         endAt,
         status
