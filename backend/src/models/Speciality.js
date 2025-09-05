@@ -10,6 +10,7 @@ const specialitySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  location: {type: {type: String, default: 'Point'}, coordinates: [Number]},
   description: {
     type: String,
     required: true,

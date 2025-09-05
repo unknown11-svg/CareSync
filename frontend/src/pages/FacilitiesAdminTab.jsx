@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Form, Badge, Alert } from 'react-bootstrap';
+import { Table, Button, Form, Badge, Alert, FormGroup } from 'react-bootstrap';
 import { FiEdit2, FiTrash2, FiPlus, FiSearch, FiX, FiActivity, FiStar, FiChevronUp } from 'react-icons/fi';
 import './FacilitiesAdminTab.css'; 
 import api from '../services/api'; 
@@ -14,6 +14,9 @@ const FacilitiesAdminTab = () => {
     services: '',
     referralContact: '',
     notes: '',
+    locationName: '',
+    latitude: '',
+    longitude: '',
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [showAlert, setShowAlert] = useState(false);
@@ -65,6 +68,14 @@ const FacilitiesAdminTab = () => {
         services: formData.services.split(',').map(s => s.trim()).filter(Boolean),
         referralContact: formData.referralContact,
         notes: formData.notes,
+        location: {
+          type: 'Point',
+          coordinates: [
+            parseFloat(formData.latitude) || 0,
+            parseFloat(formData.longitude) || 0
+          ],
+          name: formData.locationName
+        }
       };
 
       console.log('Updating facility with ID:', formData._id, 'Payload:', payload);
@@ -87,6 +98,9 @@ const FacilitiesAdminTab = () => {
         services: '',
         referralContact: '',
         notes: '',
+        locationName: '',
+        latitude: '',
+        longitude: '',
       });
     } catch (e) {
       console.error(e);
@@ -292,6 +306,40 @@ const FacilitiesAdminTab = () => {
                   className="form-control-custom"
                   required
                 />
+              </Form.Group>
+              <Form.Group className="form-group-custom">
+                <Form.Label>Location *</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="locationName"
+                  value={formData.locationName || ''}
+                  onChange={handleInputChange}
+                  placeholder="Facility Name or Address"
+                  className="form-control-custom"
+                  required
+                />
+                <div className="d-flex gap-2 mt-2">
+                  <Form.Control
+                    type="number"
+                    step="any"
+                    name="latitude"
+                    value={formData.latitude || ''}
+                    onChange={handleInputChange}
+                    placeholder="Latitude"
+                    className="form-control-custom"
+                    required
+                  />
+                  <Form.Control
+                    type="number"
+                    step="any"
+                    name="longitude"
+                    value={formData.longitude || ''}
+                    onChange={handleInputChange}
+                    placeholder="Longitude"
+                    className="form-control-custom"
+                    required
+                  />
+                </div>
               </Form.Group>
 
               <Form.Group className="form-group-custom">
