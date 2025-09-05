@@ -7,7 +7,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'https://caresync-4.onrender.com/',
+        target: 'https://render.com/docs/web-services#port-binding',
         changeOrigin: true
       }
     }
