@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Form, Badge, Alert, FormGroup } from 'react-bootstrap';
 import { FiEdit2, FiTrash2, FiPlus, FiSearch, FiX, FiActivity, FiStar, FiChevronUp } from 'react-icons/fi';
 import './FacilitiesAdminTab.css'; 
+import MapPicker from '../components/MapPicker';
 import api from '../services/api'; 
 
 const FacilitiesAdminTab = () => {
@@ -340,6 +341,23 @@ const FacilitiesAdminTab = () => {
                     required
                   />
                 </div>
+                  {/* Map Preview */}
+                  <MapPicker
+                    lat={parseFloat(formData.latitude)}
+                    lng={parseFloat(formData.longitude)}
+                    onChange={(lat, lng) => {
+                      setFormData({
+                        ...formData,
+                        latitude: lat,
+                        longitude: lng
+                      });
+                    }}
+                  />
+                  {(formData.latitude && formData.longitude) && (
+                    <div className="mt-2 text-muted small">
+                      Picked Coordinates: <strong>{formData.latitude}, {formData.longitude}</strong>
+                    </div>
+                  )}
               </Form.Group>
 
               <Form.Group className="form-group-custom">
