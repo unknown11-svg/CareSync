@@ -41,6 +41,7 @@ const mongoose = require('mongoose');
 const createReferral = async (req, res) => {
   try {
     const { fromFacilityId, toDepartmentId, patientId, slotId } = req.body;
+    console.log('Referral payload:', req.body);
 
     const slotObjectId = new mongoose.Types.ObjectId(slotId);
 
@@ -62,7 +63,8 @@ const createReferral = async (req, res) => {
 
     const slot = department.slots.id(slotObjectId);
     if (!slot || slot.status !== 'open') {
-      return res.status(400).json({ message: 'Slot not available' });
+      console.log('Slot not available or not open:', slot);
+      return res.status(400).json({ message: 'Slot not available', slot });
     }
 
     // Book the slot
