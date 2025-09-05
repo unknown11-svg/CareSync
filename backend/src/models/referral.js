@@ -27,7 +27,7 @@ const referralSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['booked', 'confirmed', 'cancelled'],
-    required: true
+    required: false
   }
 }, {
   // Automatically add 'createdAt' and 'updatedAt' timestamps.

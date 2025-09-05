@@ -203,7 +203,7 @@ function Referrals() {
             <option value="">Select Slot</option>
             {slots.map(s => (
               <option key={s._id} value={s._id}>
-                {new Date(s.start_at).toLocaleString()} - {new Date(s.end_at).toLocaleTimeString()}
+                {(s.startAt || s.start_at) ? new Date(s.startAt || s.start_at).toLocaleString() : '-'} - {(s.endAt || s.end_at) ? new Date(s.endAt || s.end_at).toLocaleTimeString() : '-'}
               </option>
             ))}
           </select>

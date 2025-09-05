@@ -41,11 +41,14 @@ const Slot = require('../models/slot');
 const createReferral = async (req, res) => {
   try {
     const { fromFacilityId, toDepartmentId, patientId, slotId } = req.body;
+    console.log('Referral payload:', req.body);
 
     // Check if slot is available
     const slot = await Slot.findById(slotId);
+    console.log('Slot found:', slot);
     if (!slot || slot.status !== 'open') {
-      return res.status(400).json({ message: 'Slot not available' });
+      console.log('Slot not available or not open:', slot);
+      return res.status(400).json({ message: 'Slot not available', slot });
     }
 
     // Create referral
@@ -66,6 +69,7 @@ const createReferral = async (req, res) => {
 
     res.status(201).json({ message: 'Referral created', referral });
   } catch (error) {
+    console.error('Error creating referral:', error);
     res.status(500).json({ message: 'Error creating referral', error: error.message });
   }
 };
