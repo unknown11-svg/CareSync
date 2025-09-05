@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: 'https://caresync-gdevh3eccggqhjch.southafricanorth-01.azurewebsites.net/api',
   timeout: 10000,
 });
 
