@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Form, Badge, Alert } from 'react-bootstrap';
 import { FiEdit2, FiTrash2, FiPlus, FiSearch, FiX, FiActivity, FiStar, FiChevronUp } from 'react-icons/fi';
 import './FacilitiesAdminTab.css'; 
+import api from '../services/api'; 
 
 const FacilitiesAdminTab = () => {
   const [facilities, setFacilities] = useState([]);
@@ -20,108 +21,99 @@ const FacilitiesAdminTab = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch facilities from API
-  useEffect(() => {
-    const fetchFacilities = async () => {
-      try {
-        const response = await axios.get(`${config.API_URL}/api/facility`, {
-          withCredentials: true,
-        });
-        setFacilities(response.data);
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Error fetching facilities:', err);
-        setIsLoading(false);
-      }
-    };
+useEffect(() => {
+  const fetchFacilities = async () => {
+    try {
+      const res = await api.get('/specialities');
+      setFacilities(res.data);
+    } catch (e) {
+      console.error('Error fetching facilities:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchFacilities();
-  }, []);
+  fetchFacilities();
+}, []);
+
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const saveFacility = async () => {
-    try {
-      const url = formData._id
-        ? `${config.API_URL}/api/facility/${formData._id}`
-        : `${config.API_URL}/api/facility`;
+// Fetch facilities
+const fetchFacilities = async () => {
+  try {
+    const res = await api.get('/specialities');
+    setFacilities(res.data);
+  } catch (e) {
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-      const method = formData._id ? 'put' : 'post';
-      const payload = { ...formData };
+useEffect(() => {
+  fetchFacilities();
+}, []);
 
-      if (!formData._id) {
-        delete payload._id;
-      }
+// Save (create or update) a facility
+const saveFacility = async (e) => {
+  e.preventDefault();
 
-      const response = await axios({
-        method,
-        url,
-        data: payload,
-        withCredentials: true,
-      });
+  try {
+    const payload = {
+      name: formData.name,
+      description: formData.description,
+      department: formData.department,
+      services: formData.services.split(',').map(s => s.trim()).filter(Boolean),
+      referralContact: formData.referralContact,
+      notes: formData.notes,
+    };
 
-      const savedFacility = response.data;
-
-      if (formData._id) {
-        setFacilities(
-          facilities.map((f) => (f._id === savedFacility._id ? savedFacility : f))
-        );
-        setShowAlert(true);
-        setTimeout(() => setShowAlert(false), 3000);
-      } else {
-        setFacilities([...facilities, savedFacility]);
-        // Close the form after successful addition
-        setShowForm(false);
-      }
-
-      setFormData({
-        _id: '',
-        name: '',
-        description: '',
-        department: '',
-        services: '',
-        referralContact: '',
-        notes: '',
-      });
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        console.error(err.response?.data || err.message);
-        alert('Error saving facility: ' + (err.response?.data?.message || err.message));
-      } else {
-        console.error(err);
-        alert('Error saving facility');
-      }
+          console.log('Updating facility with ID:', formData._id, 'Payload:', payload);
+    if (formData._id) {
+      // Update existing facility
+      await api.put(`/specialities/${formData._id}`, payload);
+    } else {
+      // Create new facility
+      await api.post('/specialities', payload);
+      setShowForm(false); // Close the form after creation
     }
-  };
 
-  const editFacility = (f) => {
-    setFormData(f);
-    setShowForm(true); // Open the form when editing
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    fetchFacilities(); // Refresh the list
 
-  const deleteFacility = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this facility?')) {
-      return;
-    }
-    
-    try {
-      await axios.delete(`${config.API_URL}/api/facility/${id}`, {
-        withCredentials: true,
-      });
+    setFormData({
+      _id: '',
+      name: '',
+      description: '',
+      department: '',
+      services: '',
+      referralContact: '',
+      notes: '',
+    });
+  } catch (e) {
+    console.error(e);
+  }
+};
 
-      setFacilities(facilities.filter((f) => f._id !== id));
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        console.error(err.response?.data || err.message);
-        alert('Error deleting facility: ' + (err.response?.data?.message || err.message));
-      } else {
-        console.error(err);
-        alert('Error deleting facility');
-      }
-    }
-  };
+// Edit a facility
+const editFacility = (f) => {
+  setFormData(f);
+  setShowForm(true);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// Delete a facility
+const deleteFacility = async (id) => {
+  if (!window.confirm('Are you sure you want to delete this facility?')) return;
+
+  try {
+    await api.delete(`/specialities/${id}`);
+    setFacilities(facilities.filter((f) => f._id !== id));
+  } catch (e) {
+    console.error(e);
+  }
+};
 
   const filteredFacilities = facilities.filter(f => 
     f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

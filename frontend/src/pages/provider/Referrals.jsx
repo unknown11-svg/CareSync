@@ -466,15 +466,12 @@ function Referrals() {
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
                           {r.fromFacilityId?.name || '-'}
-                        </td>
-                        <td className="p-2 border">
-                          {r.fromFacilityId?.departments
-                            ?.map(dept => dept.name)
-                            .join(', ') || '-'}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
-                          {r.slotId ? `${new Date(r.slotId.start_at || r.slotId.startAt).toLocaleString()} - ${new Date(r.slotId.end_at || r.slotId.endAt).toLocaleTimeString()}` : '-'}
-                        </td>
+                        </td><td className="p-2 border">{r.fromFacilityId?.departments?.find( dept => dept._id === r.toDepartmentId)?.name || '-'}</td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
+                            {r.slot
+                              ? `${new Date(r.slot.startAt).toLocaleString()} - ${new Date(r.slot.endAt).toLocaleTimeString()}`
+                              : '-'}
+                          </td>
                         <td className="px-4 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs rounded-full ${
                             r.status === 'confirmed' ? 'bg-green-100 text-green-800' :
@@ -488,13 +485,13 @@ function Referrals() {
                         <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                           {r.status !== 'cancelled' ? (
                             <div className="flex space-x-2">
-                              <button
+                              {/* <button
                                 className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50"
                                 onClick={() => handleEditReferral(r)}
                                 disabled={cancellingId === r._id}
                               >
                                 Edit
-                              </button>
+                              </button> */}
                               <button
                                 className="text-red-600 hover:text-red-900 disabled:opacity-50"
                                 disabled={cancellingId === r._id}

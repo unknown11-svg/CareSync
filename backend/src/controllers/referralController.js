@@ -41,7 +41,6 @@ const mongoose = require('mongoose');
 const createReferral = async (req, res) => {
   try {
     const { fromFacilityId, toDepartmentId, patientId, slotId } = req.body;
-    console.log('Referral payload:', req.body);
 
     const slotObjectId = new mongoose.Types.ObjectId(slotId);
 
@@ -63,8 +62,7 @@ const createReferral = async (req, res) => {
 
     const slot = department.slots.id(slotObjectId);
     if (!slot || slot.status !== 'open') {
-      console.log('Slot not available or not open:', slot);
-      return res.status(400).json({ message: 'Slot not available', slot });
+      return res.status(400).json({ message: 'Slot not available' });
     }
 
     // Book the slot
@@ -93,19 +91,42 @@ const createReferral = async (req, res) => {
 // Get all referrals (optionally filter by provider, patient, etc.)
 const getReferrals = async (req, res) => {
   try {
-    // You can add filters as needed, e.g., by provider or patient
     const { patientId, fromFacilityId } = req.query;
     const filter = {};
     if (patientId) filter.patientId = patientId;
     if (fromFacilityId) filter.fromFacilityId = fromFacilityId;
 
+    // Fetch referrals
     const referrals = await Referral.find(filter)
-      .populate('fromFacilityId toDepartmentId patientId slotId');
-    res.json(referrals);
+      .populate('fromFacilityId patientId'); // populate only top-level refs
+
+    // Attach the actual slot object for each referral
+    const referralsWithSlots = referrals.map(referral => {
+      const facility = referral.fromFacilityId;
+      if (!facility) return referral;
+
+      // Find the department
+      const department = facility.departments.find(
+        dept => dept._id.toString() === referral.toDepartmentId.toString()
+      );
+
+      // Find the chosen slot inside the department
+      const slot = department?.slots.find(
+        s => s._id.toString() === referral.slotId.toString()
+      );
+
+      return {
+        ...referral.toObject(),
+        slot // attach full slot object
+      };
+    });
+
+    res.json(referralsWithSlots);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching referrals', error: error.message });
   }
 };
+
 
 // Cancel a referral (set status to 'cancelled')
 const cancelReferral = async (req, res) => {
