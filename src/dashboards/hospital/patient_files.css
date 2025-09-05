@@ -1,0 +1,230 @@
+/* Full page layout */
+.layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #f9f9f9;
+  color: #222;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background-color: #2e7d32;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.logo {
+  font-size: 22px;
+  margin-bottom: 30px;
+  font-weight: bold;
+}
+
+.nav button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  text-align: left;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+}
+
+.nav button:hover {
+  background: #1b5e20;
+}
+
+/* Main Content */
+.content {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.header h1 {
+  font-size: 32px;
+  color: #1b5e20;
+}
+
+.create-btn {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.create-btn:hover {
+  background-color: #1b5e20;
+}
+
+/* Table */
+.patient-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.patient-table th,
+.patient-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.patient-table th {
+  background-color: #2e7d32;
+  color: white;
+  font-size: 16px;
+}
+
+.patient-table tr:hover {
+  background-color: #f1f8f4;
+}
+
+.edit-btn {
+  background-color: #43a047;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.edit-btn:hover {
+  background-color: #2e7d32;
+}
+
+/* States */
+.no-data {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+}
+
+.loading {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 18px;
+  color: #555;
+}
+
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(20, 20, 20, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+  z-index: 1000;
+}
+
+/* Modal box */
+.modal {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  padding: 2rem;
+  border-radius: 1.2rem;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.4s ease;
+}
+
+/* Form */
+.appointment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.appointment-form input,
+.appointment-form textarea {
+  padding: 0.8rem 1rem;
+  border-radius: 0.8rem;
+  border: 1px solid #c6f6d5;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.appointment-form input:focus,
+.appointment-form textarea:focus {
+  border: 1px solid #38a169; /* Green focus */
+  box-shadow: 0 0 6px rgba(56, 161, 105, 0.4);
+}
+
+/* Buttons */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
+.save-btn {
+  background: linear-gradient(135deg, #38a169, #48bb78); /* Green gradient */
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 0.8rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.save-btn:hover {
+  background: linear-gradient(135deg, #2f855a, #38a169);
+}
+
+.cancel-btn {
+  background: #f0fff4; /* Light green */
+  color: #22543d;
+  padding: 0.6rem 1.2rem;
+  border: 1px solid #c6f6d5;
+  border-radius: 0.8rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.cancel-btn:hover {
+  background: #c6f6d5;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
