@@ -21,7 +21,27 @@ const FacilitiesAdminTab = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch facilities from API
-useEffect(() => {
+  useEffect(() => {
+    const fetchFacilities = async () => {
+      try {
+        const res = await api.get('/specialities');
+        console.log('API Response:', res.data); // Debug: Check API response structure
+        setFacilities(res.data);
+      } catch (e) {
+        console.error('Error fetching facilities:', e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFacilities();
+  }, []);
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Fetch facilities
   const fetchFacilities = async () => {
     try {
       const res = await api.get('/specialities');
@@ -33,96 +53,112 @@ useEffect(() => {
     }
   };
 
-  fetchFacilities();
-}, []);
+  // Save (create or update) a facility
+  const saveFacility = async (e) => {
+    e.preventDefault();
 
+    try {
+      const payload = {
+        name: formData.name,
+        description: formData.description,
+        department: formData.department,
+        services: formData.services.split(',').map(s => s.trim()).filter(Boolean),
+        referralContact: formData.referralContact,
+        notes: formData.notes,
+      };
 
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+      console.log('Updating facility with ID:', formData._id, 'Payload:', payload);
+      if (formData._id) {
+        // Update existing facility
+        await api.put(`/specialities/${formData._id}`, payload);
+      } else {
+        // Create new facility
+        await api.post('/specialities', payload);
+        setShowForm(false); // Close the form after creation
+      }
+
+      fetchFacilities(); // Refresh the list
+
+      setFormData({
+        _id: '',
+        name: '',
+        description: '',
+        department: '',
+        services: '',
+        referralContact: '',
+        notes: '',
+      });
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-// Fetch facilities
-const fetchFacilities = async () => {
-  try {
-    const res = await api.get('/specialities');
-    setFacilities(res.data);
-  } catch (e) {
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-useEffect(() => {
-  fetchFacilities();
-}, []);
-
-// Save (create or update) a facility
-const saveFacility = async (e) => {
-  e.preventDefault();
-
-  try {
-    const payload = {
-      name: formData.name,
-      description: formData.description,
-      department: formData.department,
-      services: formData.services.split(',').map(s => s.trim()).filter(Boolean),
-      referralContact: formData.referralContact,
-      notes: formData.notes,
-    };
-
-          console.log('Updating facility with ID:', formData._id, 'Payload:', payload);
-    if (formData._id) {
-      // Update existing facility
-      await api.put(`/specialities/${formData._id}`, payload);
-    } else {
-      // Create new facility
-      await api.post('/specialities', payload);
-      setShowForm(false); // Close the form after creation
-    }
-
-    fetchFacilities(); // Refresh the list
-
+  // Edit a facility
+  const editFacility = (f) => {
+    // Convert services array to string if needed
+    const servicesValue = Array.isArray(f.services) 
+      ? f.services.join(', ') 
+      : f.services || '';
+    
     setFormData({
-      _id: '',
-      name: '',
-      description: '',
-      department: '',
-      services: '',
-      referralContact: '',
-      notes: '',
+      ...f,
+      services: servicesValue
     });
-  } catch (e) {
-    console.error(e);
-  }
-};
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-// Edit a facility
-const editFacility = (f) => {
-  setFormData(f);
-  setShowForm(true);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
+  // Delete a facility
+  const deleteFacility = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this facility?')) return;
 
-// Delete a facility
-const deleteFacility = async (id) => {
-  if (!window.confirm('Are you sure you want to delete this facility?')) return;
+    try {
+      await api.delete(`/specialities/${id}`);
+      setFacilities(facilities.filter((f) => f._id !== id));
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
-  try {
-    await api.delete(`/specialities/${id}`);
-    setFacilities(facilities.filter((f) => f._id !== id));
-  } catch (e) {
-    console.error(e);
-  }
-};
+  // Safe function to handle services display
+  const renderServices = (services) => {
+    if (!services) return null;
+    
+    if (Array.isArray(services)) {
+      return services.map((service, index) => (
+        <Badge key={index} bg="light" text="dark" className="service-badge">
+          {service.trim()}
+        </Badge>
+      ));
+    }
+    
+    if (typeof services === 'string') {
+      return services.split(',').map((service, index) => (
+        <Badge key={index} bg="light" text="dark" className="service-badge">
+          {service.trim()}
+        </Badge>
+      ));
+    }
+    
+    return null;
+  };
 
-  const filteredFacilities = facilities.filter(f => 
-    f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    f.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    f.services.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredFacilities = facilities.filter(f => {
+    const servicesText = Array.isArray(f.services) 
+      ? f.services.join(', ') 
+      : f.services || '';
+    
+    return (
+      (f.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (f.department || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      servicesText.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   // Function to get a random color for department badges
   const getDepartmentColor = (department) => {
+    if (!department) return '#858796';
+    
     const colors = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#f8f9fc', '#5a5c69'];
     let hash = 0;
     for (let i = 0; i < department.length; i++) {
@@ -241,6 +277,7 @@ const deleteFacility = async (id) => {
                   onChange={handleInputChange}
                   placeholder="Cardiology Center"
                   className="form-control-custom"
+                  required
                 />
               </Form.Group>
 
@@ -253,6 +290,7 @@ const deleteFacility = async (id) => {
                   onChange={handleInputChange}
                   placeholder="Heart Institute"
                   className="form-control-custom"
+                  required
                 />
               </Form.Group>
 
@@ -377,8 +415,8 @@ const deleteFacility = async (id) => {
                   <tr key={f._id} className={f._id === formData._id ? 'editing-row' : ''}>
                     <td>
                       <div className="d-flex flex-column">
-                        <strong>{f.name}</strong>
-                        <small className="text-muted">{f.description}</small>
+                        <strong>{f.name || 'Unnamed Facility'}</strong>
+                        <small className="text-muted">{f.description || 'No description'}</small>
                       </div>
                     </td>
                     <td>
@@ -388,20 +426,16 @@ const deleteFacility = async (id) => {
                           color: '#fff'
                         }}
                       >
-                        {f.department}
+                        {f.department || 'No department'}
                       </Badge>
                     </td>
                     <td>
                       <div className="services-container">
-                        {f.services.split(',').map((service, index) => (
-                          <Badge key={index} bg="light" text="dark" className="service-badge">
-                            {service.trim()}
-                          </Badge>
-                        ))}
+                        {renderServices(f.services)}
                       </div>
                     </td>
                     <td>
-                      <small>{f.referralContact}</small>
+                      <small>{f.referralContact || 'No contact information'}</small>
                     </td>
                     <td>
                       <div className="d-flex">
