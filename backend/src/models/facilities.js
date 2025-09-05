@@ -10,7 +10,7 @@ const facilitySchema = new mongoose.Schema({
         slots: [{
             startAt: {type: Date, required: true},
             endAt: {type: Date, required: true},
-            status: {type: String, required: true, enum: ['open', 'held', 'booked']}
+            status: {type: String, required: true, enum: ['open', 'closed']}
         }]
     }]
 })

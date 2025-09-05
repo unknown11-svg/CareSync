@@ -170,6 +170,7 @@ function Referrals() {
       return;
     }
     try {
+      console.log('Submitting form:', form);
       const res = await api.post('/referrals', form);
       setConfirmation(res.data.referral);
       // Reset the form and UI state

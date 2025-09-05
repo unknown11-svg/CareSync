@@ -45,6 +45,7 @@ app.use('/api/patient', require('./routes/patientRoutes'));
 app.use('/api/facilities', require('./routes/facilitiesRoutes'));
 app.use('/api/departments', require('./routes/departmentsRoutes'));
 app.use('/api/facility-admin', require('./routes/facilityAdminRoutes'));
+app.use('/api/specialties', require('./routes/SpecialityR'));
 app.use('/api/events', eventsRoutes);
 
 // Health check endpoint
