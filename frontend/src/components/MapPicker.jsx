@@ -1,27 +1,28 @@
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import locationPin from '../assets/location-pin.svg';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 
 // Fix default marker icon issue in Leaflet with Webpack
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-// Set default icon
-L.Icon.Default.mergeOptions({
-  iconUrl: markerIcon,
-  iconRetinaUrl: markerIcon2x,
-  shadowUrl: markerShadow,
+
+const pinIcon = new L.Icon({
+  iconUrl: locationPin,
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32],
 });
 
 export default function MapPicker({ lat, lng, onChange }) {
   function LocationMarker() {
     useMapEvents({
       click(e) {
-        onChange(e.latlng.lat, e.latlng.lng);
+        onChange && onChange(e.latlng.lat, e.latlng.lng);
       },
     });
-    return lat && lng ? <Marker position={[lat, lng]} /> : null;
+    return lat && lng ? <Marker position={[lat, lng]} icon={pinIcon} /> : null;
   }
 
   return (

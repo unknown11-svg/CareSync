@@ -6,6 +6,7 @@ const referralSchema = new mongoose.Schema({
   // We use mongoose.Schema.Types.ObjectId to create a reference to another document.
   fromFacilityId: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: 'Facility',
     required: true
   },
   // The ID of the target department for the referral.
@@ -16,18 +17,19 @@ const referralSchema = new mongoose.Schema({
   // The ID of the patient being referred.
   patientId: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: 'Patient',
     required: true
   },
   // The ID of the specific appointment slot that was booked.
   slotId: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: 'Slot',
     required: true
   },
   // The status of the referral. Using an enum to restrict possible values.
   status: {
     type: String,
     enum: ['booked', 'confirmed', 'cancelled'],
-    required: true
   }
 }, {
   // Automatically add 'createdAt' and 'updatedAt' timestamps.

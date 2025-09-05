@@ -51,13 +51,13 @@ export default function FacilityDashboard() {
   };
 
   return (
-    <div className="bg-white rounded shadow p-6">
-      <h1 className="text-2xl font-bold mb-6">Facility Admin Dashboard</h1>
-      <div className="mb-6 flex gap-4 border-b">
+    <div className="bg-background rounded-card shadow-card p-6 font-sans text-text-primary">
+      <h1 className="text-2xl font-bold mb-6 text-facility-accent">Facility Admin Dashboard</h1>
+      <div className="mb-6 flex gap-4 border-b border-neutral-gray">
         {TABS.map(tab => (
           <button
             key={tab.key}
-            className={`py-2 px-4 font-semibold ${activeTab === tab.key ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600'}`}
+            className={`py-2 px-4 font-semibold transition-colors ${activeTab === tab.key ? 'border-b-2 border-facility-accent text-facility-accent' : 'text-neutral-gray hover:text-facility-accent hover:border-facility-accent-hover'}`}
             onClick={() => handleTabChange(tab.key)}
             disabled={loading}
           >
@@ -67,8 +67,8 @@ export default function FacilityDashboard() {
       </div>
       {loading ? (
         <div className="flex flex-col items-center justify-center min-h-[20vh]">
-          <FaSpinner className="animate-spin text-3xl text-blue-400 mb-2" />
-          <div className="text-gray-500">Loading...</div>
+          <FaSpinner className="animate-spin text-3xl text-facility-accent mb-2" />
+          <div className="text-neutral-gray">Loading...</div>
         </div>
       ) : (
         facility ? (
@@ -81,7 +81,7 @@ export default function FacilityDashboard() {
             {activeTab === 'analytics' && <FacilityAnalytics />}
           </>
         ) : (
-          <div className="text-gray-500 text-center py-8">No facility found or assigned to your account.</div>
+          <div className="text-neutral-gray text-center py-8">No facility found or assigned to your account.</div>
         )
       )}
     </div>

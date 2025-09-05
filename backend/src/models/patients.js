@@ -36,7 +36,17 @@ const patientSchema = new mongoose.Schema({
     default: false
   },
   // An array of notification objects using the schema defined above.
-  notifications: [notificationSchema]
+  notifications: [notificationSchema],
+  // The patient's first name
+  name: {
+    type: String,
+    required: true
+  },
+  // The patient's surname
+  surname: {
+    type: String,
+    required: true
+  }
 }, {
   // Automatically add 'createdAt' and 'updatedAt' timestamps.
   timestamps: true

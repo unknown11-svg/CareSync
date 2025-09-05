@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: 'https://caresync-gdevh3eccggqhjch.southafricanorth-01.azurewebsites.net/api',
   timeout: 10000,
 });
 
@@ -24,12 +24,16 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('authUser');
-      window.location.href = '/login';
+      // Only redirect if not already on login
+      if (window.location.pathname !== '/login') {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('authUser');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
 );
+
 
 export default api;

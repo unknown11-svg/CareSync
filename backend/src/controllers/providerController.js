@@ -1,3 +1,17 @@
+// List referrals for provider, with populated fields
+const listReferrals = async (req, res) => {
+  try {
+    // Optionally filter by provider's facility or department if needed
+    const referrals = await Referral.find({})
+      .populate({ path: 'patientId', select: 'name surname phone preferredLanguage consented' })
+      .populate({ path: 'fromFacilityId', select: 'name' })
+      .populate({ path: 'toDepartmentId', select: 'name' })
+      .populate({ path: 'slotId', select: 'start_at end_at status' });
+    res.json(referrals);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching referrals', error: error.message });
+  }
+};
 
 const Referral = require('../models/referral');
 const Slot = require('../models/slot');
@@ -5,13 +19,15 @@ const Provider = require('../models/provider');
 const Facility = require('../models/facilities');
 const MobileClinic = require('../models/events');
 const jwt = require('jsonwebtoken');
+const Patient = require('../models/patients');
+const mongoose = require('mongoose');
 
 // Provider authentication
 const providerLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const provider = await Provider.findOne({ email, isActive: true });
+  const provider = await Provider.findOne({ email, isActive: true });
     if (!provider) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -37,6 +53,8 @@ const providerLogin = async (req, res) => {
 
     const providerResponse = provider.toObject();
     delete providerResponse.password;
+    // Ensure department is present in response
+    providerResponse.department = provider.department;
 
     res.json({
       token,
@@ -49,6 +67,7 @@ const providerLogin = async (req, res) => {
 
 module.exports = {
   providerLogin,
+  listReferrals,
   // Edit an event for provider facility
   updateMyEvent: async (req, res) => {
     try {
@@ -70,6 +89,17 @@ module.exports = {
       res.status(500).json({ message: 'Error updating event', error: error.message });
     }
   },
+    // List all patients (for provider referrals)
+    listPatients: async (req, res) => {
+      try {
+        // Optionally, filter by facility or other logic if needed
+        const patients = await Patient.find({}, '_id name surname phone preferredLanguage consented');
+        res.json(patients);
+      } catch (error) {
+        console.error(error); // Log the real error for debugging
+        res.status(500).json({ message: 'Error fetching patients', error: error.message });
+      }
+    },
   // Delete an event for provider facility
   deleteMyEvent: async (req, res) => {
     try {
@@ -140,8 +170,16 @@ module.exports = {
       const facility = await Facility.findById(provider.facilityId);
       if (!facility) return res.status(404).json({ message: 'Facility not found' });
 
+      console.log('DEBUG getMySlots - provider.department:', provider.department);
+      console.log('DEBUG getMySlots - facility departments:', facility.departments?.map(d => ({ name: d.name, slotsCount: d.slots?.length || 0 })));
+
       const departmentName = provider.department;
       const dept = facility.departments?.find(d => d.name === departmentName);
+      // Case-insensitive search commented out for now  
+      // const dept = facility.departments?.find(d => d.name.toLowerCase() === departmentName.toLowerCase());
+      
+      console.log('DEBUG getMySlots - found dept:', !!dept);
+      console.log('DEBUG getMySlots - dept slots count:', dept?.slots?.length || 0);
       return res.json({
         facilityId: facility._id,
         department: departmentName || null,
@@ -155,39 +193,55 @@ module.exports = {
   createMySlot: async (req, res) => {
     try {
       const provider = req.user;
-      const { startAt, endAt, status } = req.body;
+      const { department, startAt, endAt, status } = req.body;
+
+      console.log('DEBUG createMySlot - provider:', JSON.stringify(provider, null, 2));
+      console.log('DEBUG createMySlot - body:', { department, startAt, endAt, status });
 
       if (!provider?.facilityId) return res.status(400).json({ message: 'Provider missing facility' });
-      if (!provider?.department) return res.status(400).json({ message: 'Provider missing department' });
+      if (!department) return res.status(400).json({ message: 'Missing department in payload' });
       if (!startAt || !endAt) return res.status(400).json({ message: 'startAt and endAt are required' });
 
       const facility = await Facility.findById(provider.facilityId);
+      console.log('DEBUG createMySlot - facility found:', !!facility);
+      console.log('DEBUG createMySlot - facility departments:', facility?.departments?.map(d => ({ name: d.name, slotsCount: d.slots?.length || 0 })));
+      
       if (!facility) return res.status(404).json({ message: 'Facility not found' });
 
-      const departmentName = provider.department;
-      let dept = facility.departments?.find(d => d.name === departmentName);
-
-      if (!dept) {
-        facility.departments = facility.departments || [];
-        dept = {
-          id: provider._id, // associate creator as id for now
-          name: departmentName,
+      // Use department from payload (exact match)
+      let departmentObj = (facility.departments || []).find(d => d.name === department);
+      // Case-insensitive search commented out for now
+      // let departmentObj = (facility.departments || []).find(d => d.name.toLowerCase() === department.toLowerCase());
+      console.log('DEBUG departmentObj:', departmentObj); 
+      
+      // If department doesn't exist, create it
+      if (!departmentObj) {
+        console.log('Department not found, creating new department:', department);
+        departmentObj = {
+          name: department.toLowerCase(),
           slots: []
         };
-        facility.departments.push(dept);
+        facility.departments = facility.departments || [];
+        facility.departments.push(departmentObj);
+        await facility.save();
+        console.log('New department created and saved');
       }
 
-      dept.slots = dept.slots || [];
-      dept.slots.push({
+      // Create slot directly in the facility's department slots array
+      const slotData = {
         startAt: new Date(startAt),
         endAt: new Date(endAt),
         status: status || 'open'
-      });
+      };
 
+      // Add slot to department's slots array
+      departmentObj.slots = departmentObj.slots || [];
+      departmentObj.slots.push(slotData);
       await facility.save();
 
-      return res.status(201).json({ message: 'Slot created', department: departmentName });
+      return res.status(201).json({ message: 'Slot created', slot: slotData });
     } catch (error) {
+      console.error('ERROR createMySlot:', error);
       res.status(500).json({ message: 'Error creating slot', error: error.message });
     }
   }
@@ -284,6 +338,28 @@ module.exports = {
       res.status(201).json(event);
     } catch (error) {
       res.status(500).json({ message: 'Error creating event', error: error.message });
+    }
+  },
+  // Update a slot's details (startAt, endAt, status) by subdocument id
+  updateMySlot: async (req, res) => {
+    try {
+      const provider = req.user;
+      const { slotId } = req.params;
+      const { startAt, endAt, status } = req.body;
+      if (!provider?.facilityId || !provider?.department) return res.status(400).json({ message: 'Missing context' });
+      const facility = await Facility.findById(provider.facilityId);
+      if (!facility) return res.status(404).json({ message: 'Facility not found' });
+      const dept = (facility.departments || []).find(d => d.name === provider.department);
+      if (!dept) return res.status(404).json({ message: 'Department not found' });
+      const slot = (dept.slots || []).find(s => String(s._id) === String(slotId));
+      if (!slot) return res.status(404).json({ message: 'Slot not found' });
+      if (startAt) slot.startAt = new Date(startAt);
+      if (endAt) slot.endAt = new Date(endAt);
+      if (status) slot.status = status;
+      await facility.save();
+      res.json({ message: 'Slot updated', slotId });
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating slot', error: error.message });
     }
   }
 };
